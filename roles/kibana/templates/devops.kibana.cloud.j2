@@ -1,0 +1,30 @@
+upstream kibana {
+  server 127.0.0.1:{{ kibana_port }};
+}
+
+server {
+  listen 80;
+  server_name {{ dns_kibana }};
+  return 301 https://$server_name$request_uri;
+}
+
+server {
+  listen 443 ssl;
+
+  server_name {{ dns_kibana }};
+
+  ssl_certificate {{ kibana_path_cert }}/kibana.crt;
+  ssl_certificate_key {{ kibana_path_cert }}/kibana.key;
+
+  auth_basic "Restricted Access";
+  auth_basic_user_file {{ default_nginx_path }}/.htpasswd.kibana;
+
+  location / {
+    proxy_pass https://{{ ki_service }};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+}

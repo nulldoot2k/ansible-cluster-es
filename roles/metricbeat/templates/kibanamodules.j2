@@ -1,0 +1,22 @@
+
+metricbeat.modules:
+- module: kibana
+  metricsets: 
+    - cluster_actions
+    - cluster_rules
+    - node_actions
+    - node_rules
+    - settings
+    - stats
+    - status
+    
+  period: 10s
+  enabled: true
+  hosts: 
+  {% for host in master_hosts %}
+    - "https://{{ host }}:9200"
+  {% endfor %}
+
+  username: "{{ es_username }}"
+  password: "{{ es_password }}"
+  ssl.certificate_authorities: ["/etc/metricbeat/certs/elastic-certificates.p12"]

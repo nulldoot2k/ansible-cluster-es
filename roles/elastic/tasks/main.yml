@@ -1,0 +1,10 @@
+---
+
+- name: install elasticsearch
+  include: install-elastic.yml
+
+- name: create folder
+  include: create_folder.yml
+
+- name: config elastic
+  include: config-elastic.yml

@@ -1,0 +1,20 @@
+- name: SSH KeyGen command
+  shell: >
+    ssh-keygen -q -b 4096 -t rsa -N "" -C "admin@gmail.com" -f ~/.ssh/id_rsa
+    creates="~/.ssh/id_rsa"
+  ignore_errors: true
+  run_once: true
+  when: inventory_hostname == groups['elastic'][0]
+
+- name: pull public key from node
+  fetch:
+    src: "~/.ssh/id_rsa.pub"
+    dest: "{{ role_path }}/files/"
+    flat: yes
+  when: inventory_hostname == groups['elastic'][0]
+
+- name: Add SSH Public Key to Server
+  authorized_key:
+    user: root
+    key: "{{ lookup('file', 'id_rsa.pub') }}"
+  when: inventory_hostname != groups['elastic'][0]

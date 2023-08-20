@@ -1,0 +1,66 @@
+- name: Install metricbeat
+  apt: 
+    name: "metricbeat={{ es_version }}"
+    state: present
+
+- name: add file metricbeat.yml
+  template:
+    src: metricbeat.j2
+    dest: "{{ metricbeat_path_etc }}/metricbeat.yml"
+    mode: 0650
+
+- name: check folder
+  stat:
+    path: "{{ metricbeat_path_cert }}"
+  register: checkfile
+
+- name: create certs
+  shell: 'mkdir {{ metricbeat_path_cert }}'
+  when: 'checkfile.stat.exists == false'
+
+- name: add file kibana.pem
+  copy:
+    src: "{{ elasticsearch_local }}/elastic-certificates.pem"
+    dest: "{{ metricbeat_path_cert }}/kibana.pem"
+    mode: 0666
+
+- name: add file elasticsearch-ca.pem
+  copy:
+    src: "{{ elasticsearch_local }}/elastic-certificates.p12"
+    dest: "{{ metricbeat_path_cert }}/elastic-certificates.p12"
+    mode: 0666
+
+- name: Reload demon
+  systemd:
+    daemon_reload: yes
+  notify:
+    - Start metricbeat
+    - Enable metricbeat
+
+- name: metricbeat elasticsearch
+  block:
+    - name: enable elasticsearch
+      shell: 'metricbeat modules enable elasticsearch'
+
+    - name: add file /modules.d/elasticsearch.yml
+      template:
+        src: elasticsearchmodules.j2
+        dest: "{{ metricbeat_path_module }}/elasticsearch.yml"
+        mode: 0655
+  when: inventory_hostname not in groups['kibana']
+
+- name: metricbeat kibana
+  block:
+    - name: enable elasticsearch
+      shell: 'metricbeat modules enable kibana'
+
+    - name: add file /modules.d/kibanamodules.yml
+      template:
+        src: kibanamodules.j2
+        dest: "{{ metricbeat_path_module }}/kibana.yml"
+        mode: 0655
+  when: inventory_hostname not in groups['kibana']
+
+- name: restart elasticsearch
+  become: true
+  shell: 'systemctl restart metricbeat.service'

@@ -1,0 +1,26 @@
+devops-es-node1 ansible_host=devops-es-node1 ansible_user=root primary=true
+devops-es-node2 ansible_host=devops-es-node2 ansible_user=root secondary=true
+devops-es-node3 ansible_host=devops-es-node3 ansible_user=root secondary=true
+devops-es-node4 ansible_host=devops-es-node4 ansible_user=root secondary=true
+devops-ki-node1 ansible_host=devops-ki-node1  ansible_user=root threrry=true
+
+[elastic]
+devops-es-node1 
+devops-es-node2
+devops-es-node3 
+devops-es-node4 
+
+[kibana]
+devops-ki-node1 
+
+[beats:children]
+elastic
+kibana
+
+[cluster:children]
+elastic
+kibana
+
+[uninstall:children]
+elastic
+kibana

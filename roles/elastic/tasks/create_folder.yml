@@ -1,0 +1,14 @@
+- name: chown permission folder
+  shell: "sudo chown -Rf root:elasticsearch /etc/elasticsearch/*"
+
+- name: create a directory certs
+  become: true
+  file: 
+    path: "{{ elasticsearch_path_cert }}"
+    state: directory
+    owner: root
+    group: elasticsearch
+    mode: '2755'
+
+- name: delete files in certs folder
+  shell: "sudo rm -rf {{ elasticsearch_path_cert }}/*"

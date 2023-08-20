@@ -1,0 +1,17 @@
+---
+
+- name: set new hostname for groups
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: update "{{ hostname_path }}"
+  lineinfile:
+    path: "{{ path_hostname }}"
+    regexp: '^.*$'
+    line: "{{ inventory_hostname }}"
+
+- name: Overwrite hosts file
+  become: true
+  template:
+    src: hosts.j2
+    dest: "{{ path_hosts }}"

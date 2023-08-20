@@ -1,0 +1,31 @@
+---
+es_version: ''
+es_trust_pass: ''
+es_key_pass: ''
+es_heap_size: ''
+
+owner_els: elasticsearch
+group_els: elasticsearch
+
+elasticsearch_local: ""
+elasticsearch_path_usr: ""
+elasticsearch_path_bin: ""
+elasticsearch_path_etc: ""
+elasticsearch_path_cert: ""
+elasticsearch_path_lib: ""
+elasticsearch_path_log: ""
+elasticsearch_path_cert_kibana: ""
+elasticsearch_path_source: ""
+elasticsearch_path_key: ""
+elasticsearch_path_keyring: ""
+
+master_hosts:
+  - groups['elastic'][0]
+  - groups['elastic'][1]
+
+es_username: ''
+es_password: ''
+es_new_password: ''
+
+
+ssh_key_filename: id_rsa

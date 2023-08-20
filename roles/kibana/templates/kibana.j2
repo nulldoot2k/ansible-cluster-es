@@ -1,0 +1,35 @@
+server.port: {{ kibana_port }}
+
+server.host: 0.0.0.0
+
+server.publicBaseUrl: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ kibana_port }}"
+
+server.ssl.enabled: true
+
+server.ssl.certificate: {{ kibana_path_cert }}/kibana.crt
+
+server.ssl.key: {{ kibana_path_cert }}/kibana.key
+
+elasticsearch.hosts:
+{% for host in groups['elastic'] %}
+  - https://{{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+{% endfor %}
+
+elasticsearch.username: "{{ ki_username }}"
+elasticsearch.password: "{{ ki_password }}"
+
+elasticsearch.ssl.certificateAuthorities: [ "{{ kibana_path_cert }}/elastic-certificates.pem" ]
+monitoring.ui.ccs.enabled: false
+
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: {{ kibana_path_logs }}/kibana.log
+      layout:
+        type: json
+  root:
+    appenders:
+      - default
+      - file
+pid.file: {{ kibana_path_runs }}/kibana.pid

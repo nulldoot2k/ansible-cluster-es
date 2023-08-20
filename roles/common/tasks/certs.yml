@@ -1,0 +1,152 @@
+- name: Check if file elastic-stack-ca.p12 exists
+  stat:
+    path: "/usr/share/elasticsearch/elastic-stack-ca.p12"
+  register: elastic_stack_ca_file
+
+- name: Generate Elasticsearch CA certificate
+  become: true
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-certutil ca -out /usr/share/elasticsearch/elastic-stack-ca.p12 --pass {{ es_password }}"
+  when: elastic_stack_ca_file.stat.exists == False
+
+- name: Check if file elastic-certificates.p12 exists
+  stat:
+    path: "{{ elasticsearch_path_usr }}/http/elastic-certificates.p12"
+  register: elastic_certificates_file
+
+- name: Generate Elasticsearch Crt certificate
+  become: true
+  shell: "{{ elasticsearch_path_bin }}/elasticsearch-certutil cert --ca {{ elasticsearch_path_usr }}/elastic-stack-ca.p12 --ca-pass {{ es_password }} -out {{ elasticsearch_path_usr }}/elastic-certificates.p12 --pass {{ es_password }}"
+  when: elastic_certificates_file.stat.exists == False
+
+- name: Check if file certificate-bundle.zip exists
+  stat:
+    path: "{{ elasticsearch_path_usr }}/certificate-bundle.zip"
+  register: certificate_bundle_file
+
+- name: Set IP DNS
+  shell: "echo {{ IP }}"
+  register: cert_bundle
+    
+- name: Show IP DNs
+  debug:
+    msg: "IP = {{ cert_bundle }}"
+
+- name: Set hostname
+  shell: "echo {{ hostname }}"
+  register: hostname
+    
+- name: Show hostname
+  debug:
+    msg: "echo {{ hostname }}"
+
+- name: Set dns_elastic list
+  set_fact:
+    dns_elastic_list: "{{ dns_elastic_list + ['devops' + (item.0 + elastic_host_index) | string + '.elastic.cloud'] }}"
+  with_indexed_items: "{{ groups['elastic'] }}"
+  
+- name: Show list dns_elastic
+  debug:
+    msg: "echo {{ dns_elastic_list | join(', ') }}"
+      
+# - name: Generate Elasticsearch certificate bundle to file zip
+#   become: true
+#   shell: "{{ elasticsearch_path_bin }}/elasticsearch-certutil cert --ca {{ elasticsearch_path_usr }}/elastic-stack-ca.p12 --ca-pass {{ es_password }} --name http --pem --ip {{ IP }} --dns {{ dns_elastic_list | join(', ') }},{{ dns_kibana }},{{ hostname }} -out {{ elasticsearch_path_usr }}/certificate-bundle.zip"
+#   when: certificate_bundle_file.stat.exists == False
+
+- name: Generate Elasticsearch certificate bundle to file zip
+  become: true
+  shell: "{{ elasticsearch_path_bin }}/elasticsearch-certutil cert --ca {{ elasticsearch_path_usr }}/elastic-stack-ca.p12 --ca-pass {{ es_password }} --name http --pem --ip {{ IP }} --dns {{ dns_elastic_list | join(', ') }},{{ dns_kibana }} -out {{ elasticsearch_path_usr }}/certificate-bundle.zip"
+  when: certificate_bundle_file.stat.exists == False
+    
+- name: Unzip file certificate-bundle.zip after generate
+  unarchive:
+    src: "{{ elasticsearch_path_usr }}/certificate-bundle.zip"
+    dest: "{{ elasticsearch_path_usr }}/"
+    remote_src: yes
+
+- name: remove file unzip
+  shell: "sudo rm -rf /usr/share/elasticsearch/certificate-bundle.zip"
+
+- name: move file p12 elastic to folder http
+  shell: "mv /usr/share/elasticsearch/elastic-certificates.p12 /usr/share/elasticsearch/http/"
+    
+- name: Find files in folder http
+  find:
+    paths: "{{ elasticsearch_path_usr }}/http"
+    patterns: "*"
+  register: files_to_fetch
+
+- name: Clone files from folder http to local
+  fetch:
+    src: "{{ item.path }}"
+    dest: "{{ elasticsearch_local }}/"
+    flat: yes
+  with_items: "{{ files_to_fetch.files }}"
+
+# Certs Kibana
+
+- name: kibana gen certs Pem
+  shell: "openssl pkcs12 -in {{ elasticsearch_path_usr }}/elastic-stack-ca.p12 -passin pass:{{ es_password }} -out {{ elasticsearch_path_usr }}/elastic-certificates.pem -passout pass:{{ es_password }}"
+
+- name: Generate Kibana certificate and key to folder kibana-server
+  shell: |
+    mkdir "{{ elasticsearch_path_usr }}"/kibana-server
+    cat "{{ elasticsearch_path_usr }}"/elastic-certificates.pem > "{{ elasticsearch_path_cert_kibana }}"/kibana.pem
+    openssl x509 -outform pem -in "{{ elasticsearch_path_cert_kibana }}"/kibana.pem -out "{{ elasticsearch_path_cert_kibana }}"/kibana.crt
+    openssl pkey -outform pem -in "{{ elasticsearch_path_cert_kibana }}"/kibana.pem -out "{{ elasticsearch_path_cert_kibana }}"/kibana.key -passin pass:{{ es_password }}
+
+- name: move file kibana pem to folder kibana-server
+  shell: "mv /usr/share/elasticsearch/elastic-certificates.pem /usr/share/elasticsearch/kibana-server/"
+
+- name: Find files in folder kibana-server
+  find:
+    paths: "{{ elasticsearch_path_usr }}/kibana-server"
+    patterns: "*"
+  register: files_to_fetch
+
+- name: Clone files from folder kibana-server to local
+  fetch:
+    src: "{{ item.path }}"
+    dest: "{{ elasticsearch_local }}/"
+    flat: yes
+  with_items: "{{ files_to_fetch.files }}"
+      
+- name: remove all key in folder http with elasticsearch
+  shell: "sudo rm -rf /usr/share/elasticsearch/http"
+  tags: remove-key-elastic
+    
+- name: remove all key in folder kibana-server with kibana
+  shell: "sudo rm -rf /usr/share/elasticsearch/kibana-server"
+  tags: remove-key-kibana
+    
+- name: Find files in elasticsearch/certs folder
+  tags: remove-key-elastic
+  find:
+    paths: "/etc/elasticsearch/certs"
+    patterns: "*"
+  register: files_to_remove
+  when: "'cluster' in group_names"
+
+- name: Remove files in elasticsearch/certs folder
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ files_to_remove.files }}"
+  when: "'cluster' in group_names"
+  tags: remove-key-elastic
+    
+- name: Find files in kibana/certs folder
+  tags: remove-key-kibana
+  find:
+    paths: "/etc/kibana/certs"
+    patterns: "*"
+  register: files_to_remove
+  when: "'cluster' in group_names"
+
+- name: Remove files in kibana/certs folder
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ files_to_remove.files }}"
+  when: "'cluster' in group_names"
+  tags: remove-key-kibana

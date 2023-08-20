@@ -1,0 +1,22 @@
+---
+ 
+# Handler for elasticsearch
+
+- name: Start Elasticsearch
+  systemd:
+    name: elasticsearch
+    state: started
+  register: elasticsearch_status
+
+- name: Restart Elasticsearch
+  systemd:
+    name: elasticsearch
+    state: restarted
+    daemon_reexec: yes
+    daemon_reload: yes
+  when: elasticsearch_status.changed or elasticsearch_status.failed
+
+- name: Enable Elasticsearch
+  service:
+    name: elasticsearch
+    enabled: yes

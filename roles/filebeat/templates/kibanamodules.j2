@@ -1,0 +1,9 @@
+- module: kibana
+
+  access:
+    enabled: true
+    var.paths: ["{{kibana_path_logs}}/kibana.log*"]
+
+  error:
+    enabled: true
+    var.paths: ["{{kibana_path_logs}}/kibana.log*"]

@@ -1,0 +1,38 @@
+---
+
+- name: ensure common
+  tags: ['common']
+  hosts: [ cluster ]
+  become: true
+  roles: [ common ]
+
+- name: ensure elastic
+  tags: ['elastic']
+  gather_facts: true
+  become: true
+  hosts: [ elastic ]
+  roles: [ elastic ]
+
+- name: ensure kibana
+  tags: ['kibana']
+  become: true
+  hosts: [ kibana ]
+  roles: [ kibana ]
+
+- name: filebeat
+  tags: ['filebeat']
+  become: true
+  hosts: beats
+  roles: [ filebeat ]
+  
+- name: metricbeat
+  tags: ['metricbeat']
+  become: true
+  hosts: beats
+  roles: [ metricbeat ]
+    
+- name: uninsall elk stack
+  tags: ['uninstall']
+  become: true
+  hosts: uninstall
+  roles: [ uninstall-elk ]

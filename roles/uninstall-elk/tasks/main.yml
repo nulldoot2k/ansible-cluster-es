@@ -1,0 +1,43 @@
+---
+# tasks file for roles/remove
+- name: Disable service before remove
+  shell: if systemctl is-enabled --quiet {{ item }}; then systemctl disable {{ item }} && echo disable_ok ; fi
+  register: output
+  changed_when: "'disable_ok' in output.stdout"
+  loop:
+    - elasticsearch
+    - kibana
+    - metricbeat
+    - filebeat
+    - logstash
+    - nginx
+   
+# - name: Remove nginx packages
+#   become: true
+#   apt:
+#     name: 
+#       - nginx
+#     state: absent
+#     autoremove: yes
+      
+- name: Purge ELK packages
+  shell: "sudo apt purge --remove -y elasticsearch kibana logstash metricbeat filebeat nginx nginx-full nginx-common"
+  ignore_errors: yes
+
+- name: autoremove package
+  shell: "sudo apt autoremove -y"
+
+- name: Purge ELK directories
+  shell: "sudo rm -rf /usr/share/filebeat/ /usr/share/elasticsearch/ /usr/share/logstash/ /usr/share/kibana/ /etc/metricbeat /etc/filebeat /var/lib/metricbeat /var/lib/filebeat /etc/logstash/ /etc/filebeat/ /etc/kibana /etc/elasticsearch/ /var/lib/elasticsearch/ /var/lib/logstash/ /var/lib/filebeat /var/lib/kibana /var/log/logstash/ /var/log/elasticsearch /var/log/filebeat/ /var/log/metricbeat /etc/nginx /usr/sbin/nginx"
+
+- name: remove pgp
+  shell: "sudo rm -rf /usr/share/keyrings/elasticsearch-keyring.gpg"
+
+- name: remove source
+  shell: "sudo rm -rf /etc/apt/sources.list.d/elastic-8.x.list"
+  
+- name: update package
+  shell: "sudo apt -y autoremove"
+
+- name: update package
+  shell: "sudo apt-get update"

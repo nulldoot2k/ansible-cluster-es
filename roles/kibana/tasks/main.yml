@@ -1,0 +1,100 @@
+---
+
+- name: Install Kibana and apache2-utils
+  become: true
+  apt:
+    name:
+      - "kibana={{ es_version }}"
+      - apache2-utils
+    state: present
+
+- name: daemon Reload
+  systemd:
+    daemon_reload: yes
+  notify:
+    - Start "{{ ki_service }}"
+    - Enable "{{ ki_service }}"
+
+- name: create folder certs
+  file:
+    path: "{{ kibana_path_cert }}"
+    state: directory
+    owner: "{{ owner_ki }}"
+    group: "{{ group_ki }}"
+
+- name: copy file certs  kibana
+  copy:
+    src: "{{ elasticsearch_local }}/elastic-certificates.pem"
+    dest: "{{ kibana_path_cert }}/"
+
+- name: copy file certs  kibana
+  copy:
+    src: "{{ elasticsearch_local }}/kibana.crt"
+    dest: "{{ kibana_path_cert }}/"
+
+- name: copy file certs  kibana
+  copy:
+    src: "{{ elasticsearch_local }}/kibana.key"
+    dest: "{{ kibana_path_cert }}/"
+      
+- name: set permission files in folder certs
+  become: true
+  file: 
+    path: "{{ kibana_path_cert }}/"
+    owner: "{{ owner_ki }}"
+    group: "{{ group_ki }}"
+    recurse: yes
+    state: directory
+    mode: '0660'
+
+- name: set permission folder certs
+  file: 
+    path: "{{ kibana_path_cert }}"
+    state: directory
+    owner: "{{ owner_ki }}"
+    group: "{{ group_ki }}"
+    mode: '0755'
+  become: true
+
+- name: Add file kibana.yml
+  template:
+    src: kibana.j2
+    dest: "{{ kibana_path_conf }}/kibana.yml"
+    owner: "{{ owner_ki }}"
+    group: "{{ group_ki }}"
+    mode: 0660
+
+- name: Check Kibana
+  systemd:
+    name: "{{ ki_service }}"
+    state: started
+  register: kibana_status
+
+- name: Restart or start Kibana service
+  systemd:
+    name: "{{ ki_service }}"
+    state: "{{ 'started' if kibana_status.status == 'running' else 'restarted' }}"
+
+- name: Create passwd nginx reverse proxy
+  shell: 'sudo htpasswd -b -c {{ default_nginx_path }}/.htpasswd.kibana elastic password'
+
+- name: copy file nginx reverse
+  template:
+    src: devops.kibana.cloud.j2
+    dest: "{{ nginx_path_site_avai }}/devops.kibana.cloud"
+
+- name: Create symbolic link if not exists
+  become: true
+  file:
+    src: "{{ nginx_path_site_avai }}/devops.kibana.cloud"
+    dest: "{{ nginx_path_site_enab }}/devops.kibana.cloud"
+    state: link
+    force: no
+
+- name: iptable nginx
+  shell: "sudo iptables -A INPUT -p tcp --dport 80 ! -s 127.0.0.1 -j DROP"
+
+- name: restart Nginx
+  systemd:
+    name: nginx
+    state: restarted
