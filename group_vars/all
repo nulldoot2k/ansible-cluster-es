@@ -2,8 +2,8 @@
 
 clustername: "elasticsearch"
 
-host_names:
-  - "{{ hostvars[groups]['elastic'][ansible_host] }}"
+host_names: "{{ groups['elastic']}}"
+  #- "{{ hostvars[groups]['elastic'][ansible_host] }}"
    
 master_hosts:
   - "{{ groups['elastic'][0]}}"

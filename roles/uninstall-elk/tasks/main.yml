@@ -11,14 +11,6 @@
     - filebeat
     - logstash
     - nginx
-   
-# - name: Remove nginx packages
-#   become: true
-#   apt:
-#     name: 
-#       - nginx
-#     state: absent
-#     autoremove: yes
       
 - name: Purge ELK packages
   shell: "sudo apt purge --remove -y elasticsearch kibana logstash metricbeat filebeat nginx nginx-full nginx-common"

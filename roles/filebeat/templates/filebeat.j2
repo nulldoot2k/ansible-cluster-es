@@ -74,7 +74,7 @@ setup.kibana:
   host: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ kibana_port }}"
   ssl:
      enabled: true
-     certificate_authorities: ["/etc/filebeat/certs/elastic-certificates.pem"]
+     certificate_authorities: ["/etc/elasticsearch/certs/elastic-certificates.pem"]
 
   #space.id:
 

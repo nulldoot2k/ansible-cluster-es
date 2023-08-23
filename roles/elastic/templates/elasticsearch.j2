@@ -5,7 +5,7 @@ cluster.name: {{ clustername }}
 node.name: {{inventory_hostname}}
 
 {% if inventory_hostname in master_hosts %}
-node.roles: [ master, data ]
+node.roles: [ master, data, remote_cluster_client ]
 {% else %}
 node.roles: [ data, ingest ]
 {% endif %}
@@ -19,7 +19,7 @@ network.host: 0.0.0.0
 http.port: {{ es_port }}
 
 discovery.seed_hosts:
-{% for host in master_hosts %}
+{% for host in host_names %}
   - {{ host }}
 {% endfor %}
 

@@ -1,20 +1,11 @@
 ---
 
-- name: copy file certs
+- name: Copy files from cloned folder http to destination
+  tags: add-key-elastic
   copy:
-    src: "{{ elasticsearch_local }}/http.key"
+    src: "{{ elasticsearch_local }}/http/"
     dest: "{{ elasticsearch_path_cert }}"
 
-- name: copy file certs
-  copy:
-    src: "{{ elasticsearch_local }}/http.crt"
-    dest: "{{ elasticsearch_path_cert }}"
-      
-- name: copy file certs
-  copy:
-    src: "{{ elasticsearch_local }}/elastic-certificates.p12"
-    dest: "{{ elasticsearch_path_cert }}"
-      
 - name: set permission files in folder certs
   become: true
   file: 
@@ -68,21 +59,21 @@
     group: elasticsearch
     mode: '2755'
 
-- name: Find files in /var/lib/elasticsearch/ folder
-  tags: elastic-master
-  find:
-    paths: "/var/lib/elasticsearch/"
-    patterns: "*"
-  register: files_to_remove
-  when: "inventory_hostname == groups['elastic'][0]"
-
-- name: Remove files in /var/lib/elasticsearch/ folder
-  tags: elastic-master
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ files_to_remove.files }}"
-  when: "inventory_hostname == groups['elastic'][0]"
+# - name: Find files in /var/lib/elasticsearch/ folder
+#   tags: elastic-master
+#   find:
+#     paths: "/var/lib/elasticsearch/"
+#     patterns: "*"
+#   register: files_to_remove
+#   when: "inventory_hostname == groups['elastic'][0]"
+#
+# - name: Remove files in /var/lib/elasticsearch/ folder
+#   tags: elastic-master
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   with_items: "{{ files_to_remove.files }}"
+#   when: "inventory_hostname == groups['elastic'][0]"
       
 - name: daemon service
   shell: "sudo /bin/systemctl daemon-reload"

@@ -22,21 +22,27 @@
     owner: "{{ owner_ki }}"
     group: "{{ group_ki }}"
 
-- name: copy file certs  kibana
-  copy:
-    src: "{{ elasticsearch_local }}/elastic-certificates.pem"
-    dest: "{{ kibana_path_cert }}/"
-
-- name: copy file certs  kibana
-  copy:
-    src: "{{ elasticsearch_local }}/kibana.crt"
-    dest: "{{ kibana_path_cert }}/"
-
-- name: copy file certs  kibana
-  copy:
-    src: "{{ elasticsearch_local }}/kibana.key"
-    dest: "{{ kibana_path_cert }}/"
+# - name: copy file certs  kibana
+#   copy:
+#     src: "{{ elasticsearch_local }}/elastic-certificates.pem"
+#     dest: "{{ kibana_path_cert }}/"
+#
+# - name: copy file certs  kibana
+#   copy:
+#     src: "{{ elasticsearch_local }}/kibana.crt"
+#     dest: "{{ kibana_path_cert }}/"
+#
+# - name: copy file certs  kibana
+#   copy:
+#     src: "{{ elasticsearch_local }}/kibana.key"
+#     dest: "{{ kibana_path_cert }}/"
       
+- name: Copy files from cloned folder kibana-server to destination
+  tags: add-key-elastic
+  copy:
+    src: "{{ elasticsearch_local }}/kibana-server/"
+    dest: "{{ kibana_path_cert }}/"
+    
 - name: set permission files in folder certs
   become: true
   file: 

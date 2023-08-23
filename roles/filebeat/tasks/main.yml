@@ -6,12 +6,12 @@
 
 - name: check folder
   stat:
-    path: "{{ filebeat_path_cert }}"
+    path: "/etc/elasticsearch/certs"
   register: checkfile
 
-- name: create certs
-  shell: 'mkdir {{ filebeat_path_cert }}'
-  when: 'checkfile.stat.exists == false'
+# - name: create certs
+#   shell: 'mkdir {{ filebeat_path_cert }}'
+#   when: 'checkfile.stat.exists == false'
 
 - name: add file kibana.pem
   copy:
