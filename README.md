@@ -1,4 +1,4 @@
-# Deploy ELK Automation with Ansible
+# Deploy ELK 8.X Automation with Ansible
 
 ## How it works!
 
