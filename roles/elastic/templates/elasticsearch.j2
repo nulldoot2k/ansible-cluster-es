@@ -4,33 +4,34 @@ cluster.name: {{ clustername }}
 
 node.name: {{inventory_hostname}}
 
-{% if inventory_hostname in master_hosts %}
+{% if inventory_hostname in groups['elastic_master'] %}
 node.roles: [ master, data, remote_cluster_client ]
 {% else %}
 node.roles: [ data, ingest ]
 {% endif %}
 
-path.data: {{ elasticsearch_path_lib }}
-
-path.logs: {{ elasticsearch_path_log }}
+path:
+  data: {{ elasticsearch_path_lib }}
+  logs: {{ elasticsearch_path_log }}
 
 network.host: 0.0.0.0
 
 http.port: {{ es_port }}
 
 discovery.seed_hosts:
-{% for host in host_names %}
+{% for host in groups['elastic'] %}
   - {{ host }}
 {% endfor %}
 
 cluster.initial_master_nodes:
-{% for host in master_hosts %}
+{% for host in groups['elastic_master'] %}
   - {{ host }}
 {% endfor %}
 
 xpack.security.enabled: true
 
 xpack.security.enrollment.enabled: true
+xpack.monitoring.collection.enabled: true
 
 xpack.security.http.ssl:
   enabled: true

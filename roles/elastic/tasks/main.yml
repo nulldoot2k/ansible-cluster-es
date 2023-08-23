@@ -1,10 +1,12 @@
 ---
 
+- setup:
+  
+- name: check preflight task
+  include_tasks: preflight.yml
+
 - name: install elasticsearch
   include: install-elastic.yml
-
-- name: create folder
-  include: create_folder.yml
 
 - name: config elastic
   include: config-elastic.yml

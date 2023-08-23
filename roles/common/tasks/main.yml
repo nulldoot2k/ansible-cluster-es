@@ -15,4 +15,4 @@
 - name: install certs
   include: certs.yml
   tags: certs
-  when: inventory_hostname == groups['elastic'][0]
+  when: inventory_hostname in groups['elastic_ca']

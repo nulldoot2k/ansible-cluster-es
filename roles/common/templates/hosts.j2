@@ -1,5 +1,6 @@
 127.0.0.1 localhost
-127.0.1.1 {{ inventory_hostname }} devops{{ ansible_play_hosts.index(inventory_hostname) + 1 }}.{% if 'elastic' in group_names %}elastic.cloud{% else %}kibana.cloud{% endif %} localhost
+
+127.0.1.1 {{ inventory_hostname }} devops{{ groups['elastic'].index(inventory_hostname) + 1 if inventory_hostname in groups['elastic'] else '' }}.{{ 'elastic.cloud' if inventory_hostname in groups['elastic'] else 'kibana.cloud' }} localhost
 
 {% for host in groups['elastic'] %}
 {{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['inventory_hostname'] }} devops{{ loop.index }}.elastic.cloud

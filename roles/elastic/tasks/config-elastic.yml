@@ -24,16 +24,38 @@
     group: elasticsearch
     mode: '0760'
 
+# keystore
+ 
+- name: keystore exists
+  tags: elastic-keystone
+  stat:
+    path: "{{ elasticsearch_path_etc }}/elasticsearch.keystore"
+  register: keystore_file
+
+- name: "Remove secure password to keystore {{ item }}"
+  become: true
+  tags: elastic-keystone
+  shell: "/usr/share/elasticsearch/bin/elasticsearch-keystore remove {{ item }}"
+  with_items:
+    - "xpack.security.transport.ssl.keystore.secure_password"
+    - "xpack.security.transport.ssl.truststore.secure_password"
+    - "xpack.security.http.ssl.keystore.secure_password"
+    # - "xpack.security.http.ssl.truststore.secure_password"
+  ignore_errors: yes
+  when: "keystore_file.stat.exists == true"
+
 - name: "Add secure password to keystore {{ item }}"
+  tags: elastic-keystone
   become: true
   shell: "echo password | sudo -n /usr/share/elasticsearch/bin/elasticsearch-keystore add -x -f {{ item }}"
   with_items:
     - "xpack.security.transport.ssl.keystore.secure_password"
     - "xpack.security.transport.ssl.truststore.secure_password"
     - "xpack.security.http.ssl.keystore.secure_password"
-    - "xpack.security.http.ssl.truststore.secure_password"
+    - "bootstrap.password"
+  ignore_errors: yes
 
-- name: Add file elasticsearch.yml
+- name: "Add file elasticsearch.yml"
   tags: add-file-elastic
   template:
     src: elasticsearch.j2
@@ -96,20 +118,15 @@
     state: restarted
     daemon_reexec: yes
     daemon_reload: yes
-  when: inventory_hostname in master_hosts | map('string')
+  when: inventory_hostname in groups['elastic_master']
     
-# - name: test check varible master_hosts
-#   tags: elastic-master
-#   debug:
-#     var: master_hosts
-
 - name: reset-passwd-elastic
   shell: 'printf "{{ es_password }}\n{{ es_new_password }}" | {{ elasticsearch_path_bin }}/elasticsearch-reset-password -b -i -u {{ es_username }}'
-  when: "inventory_hostname == groups['elastic'][0]"
+  when: "inventory_hostname in groups['elastic_ca']"
 
 - name: reset-passwd-kibana
   shell: 'printf "{{ ki_password }}\n{{ ki_password }}" | {{ elasticsearch_path_bin }}/elasticsearch-reset-password -b -i -u {{ ki_username }}'
-  when: "inventory_hostname == groups['elastic'][0]"
+  when: "inventory_hostname in groups['elastic_ca']"
 
 - name: Restart worker
   tags: elastic-worker
@@ -118,7 +135,7 @@
     state: restarted
     daemon_reexec: yes
     daemon_reload: yes
-  when: inventory_hostname not in master_hosts | map('string')
+  when: inventory_hostname in groups['elastic_data']
     
 - name: Enable Elasticsearch
   service:

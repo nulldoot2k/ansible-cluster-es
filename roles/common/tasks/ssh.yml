@@ -1,20 +1,20 @@
-- name: SSH KeyGen command
+- name: "Generate SSH key pair"
   shell: >
     ssh-keygen -q -b 4096 -t rsa -N "" -C "admin@gmail.com" -f ~/.ssh/id_rsa
     creates="~/.ssh/id_rsa"
   ignore_errors: true
   run_once: true
-  when: inventory_hostname == groups['elastic'][0]
+  when: inventory_hostname in groups['elastic_ca']
 
-- name: pull public key from node
+- name: "Fetch public key from the elastic node"
   fetch:
     src: "~/.ssh/id_rsa.pub"
     dest: "{{ role_path }}/files/"
     flat: yes
-  when: inventory_hostname == groups['elastic'][0]
+  when: inventory_hostname in groups['elastic_ca']
 
-- name: Add SSH Public Key to Server
+- name: "Add SSH Public Key to Server"
   authorized_key:
     user: root
     key: "{{ lookup('file', 'id_rsa.pub') }}"
-  when: inventory_hostname != groups['elastic'][0]
+  when: inventory_hostname not in groups['elastic_ca']

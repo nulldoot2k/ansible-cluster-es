@@ -1,0 +1,9 @@
+---
+
+- name: Install utils
+  ansible.builtin.package:
+    name: 
+      - jq
+      - unzip
+    state: present
+    update_cache: yes
