@@ -1,0 +1,80 @@
+---
+
+- shell: uname -s
+  register: unames
+
+- shell: uname -m
+  register: unamem
+
+- name: Install metricbeat
+  apt: 
+    name: 
+      - "metricbeat={{ es_version }}"
+    state: present
+
+- name: Fix directory permission
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    mode: u=rwX,g=rX,o-rwx
+  loop:
+    - "{{ metricbeat_conf_dir }}"
+    - "{{ metricbeat_data_dir }}"
+    - "{{ metricbeat_log_dir }}"
+    - "{{ metricbeat_certs_dir }}"
+
+- name: Copy elastic CA Pem metricbeat
+  copy:
+    src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
+    dest: "{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
+    mode: 0644
+
+- name: Copy elastic CA P12 metricbeat
+  copy:
+    src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
+    dest: "{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_p12 }}"
+    mode: 0644
+
+- name: Add file metricbeat.yml
+  template:
+    src: metricbeat/metricbeat.j2
+    dest: "{{ metricbeat_conf_dir }}/metricbeat.yml"
+    mode: 0640
+  notify:
+    - reload metricbeat
+
+- name: Reload demon
+  systemd:
+    daemon_reload: yes
+  notify:
+    - Start metricbeat
+    - Enable metricbeat
+
+- name: metricbeat elasticsearch
+  block:
+    - name: enable elasticsearch
+      shell: 'metricbeat modules enable elasticsearch'
+
+    - name: add file /modules.d/elasticsearch.yml
+      template:
+        src: metricbeat/elasticsearchmodules.j2
+        dest: "{{ metricbeat_path_module }}/elasticsearch.yml"
+        mode: 0640
+  when: inventory_hostname in groups['elastic']
+
+- name: metricbeat kibana
+  block:
+    - name: enable elasticsearch
+      shell: 'metricbeat modules enable kibana'
+
+    - name: add file /modules.d/kibanamodules.yml
+      template:
+        src: metricbeat/kibanamodules.j2
+        dest: "{{ metricbeat_path_module }}/kibana.yml"
+        mode: 0640
+  when: inventory_hostname in groups['kibana']
+
+- name: restart elasticsearch
+  become: true
+  shell: 'systemctl restart metricbeat.service'

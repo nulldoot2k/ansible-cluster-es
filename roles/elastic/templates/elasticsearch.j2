@@ -4,10 +4,15 @@ cluster.name: {{ clustername }}
 
 node.name: {{inventory_hostname}}
 
+node.roles:
 {% if inventory_hostname in groups['elastic_master'] %}
-node.roles: [ master, data, remote_cluster_client ]
+{% for role in elasticsearch_default_node_roles %}
+  - {{ role }}
+{% endfor %}
 {% else %}
-node.roles: [ data, ingest ]
+{% for role in elasticsearch_master_is_also_data_node %}
+  - {{ role }}
+{% endfor %}
 {% endif %}
 
 path:

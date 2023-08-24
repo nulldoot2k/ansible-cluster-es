@@ -1,0 +1,80 @@
+---
+
+- shell: uname -s
+  register: unames
+
+- shell: uname -m
+  register: unamem
+
+- name: is heartbeat installed
+  apt: 
+    name: 
+      - "heartbeat={{ es_version }}"
+    state: present
+      
+- name: Fix directory permission
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    mode: u=rwX,g=rX,o-rwx
+  loop:
+    - "{{ heartbeat_conf_dir }}"
+    - "{{ heartbeat_data_dir }}"
+    - "{{ heartbeat_log_dir }}"
+    - "{{ heartbeat_certs_dir }}"
+
+- name: Copy elastic CA Pem heartbeat
+  copy:
+    src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
+    dest: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
+    mode: 0644
+
+- name: Copy elastic CA P12 heartbeat
+  copy:
+    src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
+    dest: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_p12 }}"
+    mode: 0644
+      
+- name: Render heartbeat configuration file
+  template:
+    src: heartbeat/heartbeat.yml.j2
+    dest: "{{ heartbeat_conf_dir }}/heartbeat.yml"
+    mode: 0644
+  notify:
+    - reload heartbeat
+
+- name: Reload demon
+  systemd:
+    daemon_reload: yes
+  notify:
+    - Start heartbeat
+    - Enable heartbeat
+
+- name: heartbeat elasticsearch
+  block:
+    - name: enable module elasticsearch
+      shell: 'filebeat modules enable elasticsearch'
+
+    - name: add file /modules.d/elasticsearch.yml
+      template:
+        src: heartbeat/elasticsearchmodules.j2
+        dest: "{{ filebeat_path_module }}/elasticsearch.yml"
+        mode: 0640
+  when: inventory_hostname in groups['elastic']
+
+- name: filebeat kibana
+  block:
+    - name: enable module kibana
+      shell: 'filebeat modules enable kibana'
+
+    - name: add file /modules.d/kibanamodules.yml
+      template:
+        src: heartbeat/kibanamodules.j2
+        dest: "{{ filebeat_path_module }}/kibana.yml"
+        mode: 0640
+  when: inventory_hostname in groups['elastic']
+
+- name: restart elasticsearch
+  become: true
+  shell: 'systemctl restart heartbeat.service'

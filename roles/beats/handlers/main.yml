@@ -1,0 +1,20 @@
+---
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: reload filebeat
+  systemd:
+    name: filebeat 
+    state: restarted
+
+- name: reload heartbeat
+  systemd:
+    name: heartbeat 
+    state: restarted
+
+- name: reload metricbeat
+  systemd:
+    name: metricbeat 
+    state: restarted

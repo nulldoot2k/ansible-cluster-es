@@ -18,19 +18,13 @@
   become: true
   hosts: [ kibana ]
   roles: [ kibana ]
-
-- name: filebeat
-  tags: ['filebeat']
-  become: true
-  hosts: beats
-  roles: [ filebeat ]
-  
-- name: metricbeat
-  tags: ['metricbeat']
-  become: true
-  hosts: beats
-  roles: [ metricbeat ]
     
+- name: ensure beats
+  tags: ['beats']
+  become: true
+  hosts: beats
+  roles: [ beats ]
+
 - name: uninsall elk stack
   tags: ['uninstall']
   become: true

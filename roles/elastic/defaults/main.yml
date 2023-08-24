@@ -19,10 +19,6 @@ elasticsearch_path_source: ""
 elasticsearch_path_key: ""
 elasticsearch_path_keyring: ""
 
-master_hosts:
-  - groups['elastic'][0]
-  - groups['elastic'][1]
-
 es_username: ''
 es_password: ''
 es_new_password: ''

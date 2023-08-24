@@ -1,5 +1,5 @@
-
 - module: elasticsearch
+  xpack.enabled: true
   metricsets:
     - node
     - node_stats
@@ -9,10 +9,10 @@
     - shard
   period: 10s
   hosts: 
-{% for host in master_hosts %}
-  - "https://{{ host }}:9200"
-{% endfor %}
+  {% for host in groups['elastic'] %}
+  - "https://{{ hostvars[host]['ansible_host'] }}:9200"
+  {% endfor %}
 
   username: "{{ es_username }}"
   password: "{{ es_password }}"
-  ssl.certificate_authorities: ["/etc/metricbeat/certs/elastic-certificates.p12"]
+  ssl.certificate_authorities: ["{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
