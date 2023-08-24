@@ -12,10 +12,10 @@ metricbeat.modules:
   period: 10s
   enabled: true
   hosts: 
-  {% for host in groups['elastic'] %}
-  - "https://{{ hostvars[host]['ansible_host'] }}:9200"
+  {% for host in groups['kibana'] %}
+  - "https://{{ hostvars[host]['ansible_host'] }}:5601"
   {% endfor %}
 
-  username: "{{ es_username }}"
-  password: "{{ es_password }}"
+  username: "{{ ki_username }}"
+  password: "{{ ki_password }}"
   ssl.certificate_authorities: ["{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
