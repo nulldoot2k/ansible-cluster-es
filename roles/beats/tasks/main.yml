@@ -12,8 +12,9 @@
       tags: metricbeat,beats
   tags: metricbeat,beats
 
-# - include_tasks: 
-#     file: install_heartbeat.yml
-#     apply:
-#       tags: heartbeat,beats
-#   tags: heartbeat,beats
+- include_tasks: 
+    file: install_heartbeat.yml
+    apply:
+      tags: heartbeat,beats
+  tags: heartbeat,beats
+  when: "inventory_hostname in groups['elastic']"

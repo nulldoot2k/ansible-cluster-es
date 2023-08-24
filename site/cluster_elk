@@ -1,0 +1,41 @@
+devops-es-node1 ansible_host=devops-es-node1
+devops-es-node2 ansible_host=devops-es-node2
+devops-es-node3 ansible_host=devops-es-node3
+devops-es-node4 ansible_host=devops-es-node4
+devops-ki-node1 ansible_host=devops-ki-node1
+
+[elastic_master]
+devops-es-node1 
+devops-es-node2
+
+[elastic_data]
+devops-es-node3 
+devops-es-node4 
+
+[elastic_ca]
+devops-es-node1 
+
+[elastic:children]
+elastic_master
+elastic_data
+
+[kibana]
+devops-ki-node1 
+
+[beats:children]
+elastic
+kibana
+
+[cluster:children]
+elastic
+kibana
+
+[uninstall:children]
+elastic
+kibana
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_extra_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_user=root

@@ -1,5 +1,6 @@
 metricbeat.modules:
 - module: kibana
+  xpack.enabled: true
   metricsets: 
     - cluster_actions
     - cluster_rules
@@ -8,9 +9,7 @@ metricbeat.modules:
     - settings
     - stats
     - status
-    
   period: 10s
-  enabled: true
   hosts: 
   {% for host in groups['kibana'] %}
   - "https://{{ hostvars[host]['ansible_host'] }}:5601"

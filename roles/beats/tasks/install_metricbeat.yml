@@ -66,12 +66,12 @@
 - name: metricbeat kibana
   block:
     - name: enable elasticsearch
-      shell: 'metricbeat modules enable kibana'
+      shell: 'metricbeat modules enable kibana-xpack'
 
     - name: add file /modules.d/kibanamodules.yml
       template:
         src: metricbeat/kibanamodules.j2
-        dest: "{{ metricbeat_path_module }}/kibana.yml"
+        dest: "{{ metricbeat_path_module }}/kibana-xpack.yml"
         mode: 0640
   when: inventory_hostname in groups['kibana']
 

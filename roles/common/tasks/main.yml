@@ -11,6 +11,7 @@
 - name: install ssh
   include: ssh.yml
   tags: ssh
+  when: inventory_hostname in groups['elastic_ca']
 
 - name: install certs
   include: certs.yml

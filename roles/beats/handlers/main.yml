@@ -11,7 +11,7 @@
 
 - name: reload heartbeat
   systemd:
-    name: heartbeat 
+    name: heartbeat-elastic 
     state: restarted
 
 - name: reload metricbeat
