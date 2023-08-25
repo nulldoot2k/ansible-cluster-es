@@ -88,29 +88,32 @@ setup.kibana:
 # Configure what output to use when sending the data collected by the beat.
 
 # ---------------------------- Elasticsearch Output ----------------------------
-output.elasticsearch:
+# output.elasticsearch:
   # Array of hosts to connect to.
-  hosts: 
-  {% for host in groups['elastic'] %}
-  - {{ hostvars[host]['ansible_host'] }}
-  {% endfor %}
+  # hosts: 
+  # {% for host in groups['elastic'] %}
+  # - {{ hostvars[host]['ansible_host'] }}
+  # {% endfor %}
 
   # Protocol - either `http` (default) or `https`.
-  protocol: "https"
+  # protocol: "https"
 
   # Authentication credentials - either API key or username/password.
   #api_key: "id:api_key"
-  username: "{{ es_username }}"
-  password: "{{ es_password }}"
-  ssl:
-     enabled: true
-     certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
+  # username: "{{ es_username }}"
+  # password: "{{ es_password }}"
+  # ssl:
+  #    enabled: true
+  #    certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
      # ca_trusted_fingerprint: "{{ ca_trusted_fingerprint }}"
      
 # ------------------------------ Logstash Output -------------------------------
-#output.logstash:
+output.logstash:
   # The Logstash hosts
-  # hosts: ["10.3.52.164:5044"]
+  hosts: 
+  {% for host in groups['logstash'] %}
+  - {{ hostvars[host]['ansible_host'] }}
+  {% endfor %}
 
   # Optional SSL. By default is off.
   # List of root certificates for HTTPS server verifications

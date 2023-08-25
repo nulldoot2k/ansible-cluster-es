@@ -1,2 +1,27 @@
 ---
-# defaults file for roles/logstash
+
+logstash_group: logstash
+logstash_user: logstash
+
+logstash_conf_dir: /etc/logstash
+logstash_log_dir: /var/log/logstash
+logstash_pid_dir: /var/run/logstash
+logstash_certs_dir: /etc/logstash/certs
+logstash_data_dir: /var/lib/logstash
+
+logstash_beats_tcp_port: 5044
+logstash_tcp_port: 5000
+
+logstash_jvm_xmx: 1g
+logstash_jvm_xms: 1g
+
+elasticsearch_local_certs_dir: ~/very_secure_dir
+elasticsearch_ca_pem: elasticsearch-ca.pem
+elasticsearch_ca_p12: elasticsearch-ca.p12
+elasticsearch_https_enabled: yes
+elasticsearch_security_enabled: yes
+
+logstash_install_mode: http # local
+logstash_local_tar_path: ''
+
+elasticsearch_hosts: []

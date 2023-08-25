@@ -1,2 +1,74 @@
 ---
 # tasks file for roles/logstash
+
+- name: "Install Logstash"
+  become: true
+  apt:
+    name: 
+      - "logstash=1:8.3.3-1"
+      - nginx
+      - net-tools
+    state: present
+
+- name: "Fix directory permission"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    recurse: yes
+    mode: u=rwX,g=rX,o-rwx
+  loop:
+    - "{{ logstash_conf_dir }}"
+    - "{{ logstash_log_dir }}"
+    - "{{ logstash_pid_dir }}"
+    - "{{ logstash_data_dir }}"
+    - "{{ logstash_certs_dir }}"
+
+- name: Copy elastic CA Pem logstash
+  copy:
+    src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
+    dest: "{{ logstash_certs_dir }}/{{ elasticsearch_ca_pem }}"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+
+- name: Copy elastic CA P12 logstash
+  copy:
+    src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
+    dest: "{{ logstash_certs_dir }}/{{ elasticsearch_ca_p12 }}"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+
+- name: "Render logstash yml configuration file"
+  template:
+    src: logstash.yml.j2
+    dest: "{{ logstash_conf_dir }}/logstash.yml"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+  notify:
+    - reload systemd
+
+- name: "Render logstash configuration file"
+  template:
+    src: logstash.conf.j2
+    dest: "{{ logstash_conf_dir }}/conf.d/logstash.conf"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+
+- name: "Render logstash JVM configuration file"
+  template:
+    src: jvm.options.j2
+    dest: "{{ logstash_conf_dir }}/jvm.options"
+    owner: "{{ logstash_user }}"
+    group: "{{ logstash_group }}"
+    mode: 0644
+
+- name: "Enable and start logstash"
+  systemd:
+    name: logstash 
+    state: started 
+    enabled: yes

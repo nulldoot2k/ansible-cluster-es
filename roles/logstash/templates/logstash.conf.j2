@@ -1,0 +1,18 @@
+input {
+	beats {
+		port => {{ logstash_beats_tcp_port }}
+	}
+}
+
+## Add your filters / logstash plugins configuration here
+
+output {
+	elasticsearch {
+		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:9200"{% if not loop.last %},{% endif %}{% endfor %}]
+		index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
+		user => "{{ es_username }}"
+		password => "{{ es_password }}"
+		ssl_certificate_verification => false
+    ssl => true
+	}
+}

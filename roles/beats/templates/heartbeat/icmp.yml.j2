@@ -1,0 +1,26 @@
+- type: icmp # monitor type `tcp`. Connect via TCP and optionally verify endpoint
+  id: ping-{{ inventory_hostname }}
+  
+  name: My {{ inventory_hostname }} Ping
+  
+  enabled: true
+  
+  schedule: '*/5 * * * * * *' # every 5 seconds from start of beat
+
+  hosts: 
+    {% for host in groups['elastic'] -%}
+    - {{ hostvars[host]['ansible_host'] }}
+    {% endfor %}
+
+  ipv4: true
+  ipv6: true
+  mode: any
+  ports: 9200
+  timeout: 16s
+
+  # TLS/SSL connection settings:
+  ssl:
+    enabled: true
+    certificate_authorities: ["{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
+    supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+

@@ -1,15 +1,12 @@
-# elastic
+# elasticsearch
 
 clustername: "elasticsearch"
-
 es_version: "8.3.3"
 es_trust_pass: ''
 es_key_pass: ''
 es_heap_size: "1g"
-
 kibana_ssl: "true"
 es_port: "9200"
-
 es_username: "elastic"
 es_password: "password"
 es_new_password: "password"
@@ -43,6 +40,8 @@ elasticsearch_default_node_roles:
   - remote_cluster_client
   - transform
 
+es_major_version: "8.x"
+
 # Path
 
 elasticsearch_local: "./files"
@@ -56,7 +55,7 @@ elasticsearch_path_cert_kibana: "/usr/share/elasticsearch/kibana-server"
 elasticsearch_path_source: "/etc/apt/sources.list.d"
 elasticsearch_path_key: "/usr/share/keyrings"
 elasticsearch_path_keyring: "/usr/share/keyrings/elasticsearch-keyring.gpg"
-es_major_version: "8.x"
+
 
 kibana_path_cert: "/etc/kibana/certs"
 kibana_path_conf: "/etc/kibana"

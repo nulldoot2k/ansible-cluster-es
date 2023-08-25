@@ -7,7 +7,6 @@
   shell: >
     ssh-keygen -q -b 4096 -t rsa -N "" -C "admin@gmail.com" -f ~/.ssh/id_rsa
   ignore_errors: true
-  # run_once: true
   when: ssh_key_file.stat.exists == false
 
 - name: "Print SSH public key"
@@ -25,3 +24,4 @@
   authorized_key:
     user: root
     key: "{{ lookup('file', 'id_rsa.pub') }}"
+  when: inventory_hostname in groups['all']

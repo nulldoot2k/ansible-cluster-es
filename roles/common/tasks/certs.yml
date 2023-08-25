@@ -131,42 +131,42 @@
 - name: "Remove file unzip"
   shell: "sudo rm -rf /usr/share/elasticsearch/certificate-bundle.zip"
 
-- name: "Remove all key in folder http with elasticsearch"
-  shell: "sudo rm -rf /usr/share/elasticsearch/http"
-  # tags: remove-key
-    
-- name: "Remove all key in folder kibana-server with kibana"
-  shell: "sudo rm -rf /usr/share/elasticsearch/kibana-server"
-  # tags: remove-key
-    
-- name: "Find files in elasticsearch/certs folder"
-  tags: remove-key
-  find:
-    paths: "/etc/elasticsearch/certs"
-    patterns: "*"
-  register: files_to_remove
-  when: "'cluster' in group_names"
-
-- name: "Remove files in elasticsearch/certs folder"
-  tags: remove-key
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ files_to_remove.files }}"
-  when: "'cluster' in group_names"
-    
-- name: "Find files in kibana/certs folder"
-  tags: remove-key
-  find:
-    paths: "/etc/kibana/certs"
-    patterns: "*"
-  register: files_to_remove
-  when: "'kibana' in group_names"
-
-- name: "Remove files in kibana/certs folder"
-  tags: remove-key
-  file:
-    path: "{{ item.path }}"
-    state: absent
-  with_items: "{{ files_to_remove.files }}"
-  when: "'kibana' in group_names"
+# - name: "Remove all key in folder http with elasticsearch"
+#   shell: "sudo rm -rf /usr/share/elasticsearch/http"
+#   tags: remove-key
+#     
+# - name: "Remove all key in folder kibana-server with kibana"
+#   shell: "sudo rm -rf /usr/share/elasticsearch/kibana-server"
+#   tags: remove-key
+#     
+# - name: "Find files in elasticsearch/certs folder"
+#   tags: remove-key
+#   find:
+#     paths: "/etc/elasticsearch/certs"
+#     patterns: "*"
+#   register: files_to_remove
+#   when: "'cluster' in group_names"
+#
+# - name: "Remove files in elasticsearch/certs folder"
+#   tags: remove-key
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   with_items: "{{ files_to_remove.files }}"
+#   when: "'cluster' in group_names"
+#     
+# - name: "Find files in kibana/certs folder"
+#   tags: remove-key
+#   find:
+#     paths: "/etc/kibana/certs"
+#     patterns: "*"
+#   register: files_to_remove
+#   when: "'kibana' in group_names"
+#
+# - name: "Remove files in kibana/certs folder"
+#   tags: remove-key
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   with_items: "{{ files_to_remove.files }}"
+#   when: "'kibana' in group_names"

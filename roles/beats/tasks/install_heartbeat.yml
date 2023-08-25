@@ -36,9 +36,21 @@
     dest: "{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_p12 }}"
     mode: 0644
       
+- name: Add heartbeat configuration modules tcp file
+  template:
+    src: heartbeat/tcp.yml.j2
+    dest: "{{ heartbeat_conf_dir }}/monitors.d/tcp.yml"
+    mode: 0644
+      
+- name: Add heartbeat configuration modules icmp file
+  template:
+    src: heartbeat/icmp.yml.j2
+    dest: "{{ heartbeat_conf_dir }}/monitors.d/icmp.yml"
+    mode: 0644
+      
 - name: Render heartbeat configuration file
   template:
-    src: heartbeat/heartbeat.j2
+    src: heartbeat/heartbeat.yml.j2
     dest: "{{ heartbeat_conf_dir }}/heartbeat.yml"
     mode: 0644
   notify:

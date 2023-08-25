@@ -14,7 +14,7 @@
     - heartbeat-elastic
       
 - name: Purge ELK packages
-  shell: "sudo apt purge --remove -y elasticsearch kibana logstash metricbeat filebeat nginx nginx-full nginx-common heartbeat"
+  shell: "sudo apt purge --remove -y elasticsearch kibana logstash metricbeat filebeat nginx nginx-full nginx-common heartbeat-elastic"
   ignore_errors: yes
 
 - name: autoremove package

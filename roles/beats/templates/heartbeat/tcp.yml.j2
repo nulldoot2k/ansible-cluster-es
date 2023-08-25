@@ -1,0 +1,57 @@
+- type: tcp # monitor type `tcp`. Connect via TCP and optionally verify endpoint
+
+  # ID used to uniquely identify this monitor in elasticsearch even if the config changes
+  id: monitor{{ inventory_hostname }}
+
+  # Human readable display name for this service in Uptime UI and elsewhere
+  name: TCP monitor {{ inventory_hostname }}
+
+  service.name: my-apm-{{ inventory_hostname }}
+
+  # Enable/Disable monitor
+  enabled: true
+
+  # Configure task schedule
+  schedule: '@every 5s' # every 5 seconds from start of beat
+
+  hosts: 
+    {% for host in groups['elastic'] -%}
+    - {{ hostvars[host]['ansible_host'] }}
+    {% endfor %}
+
+  ipv4: true
+  ipv6: true
+  mode: any
+
+  # List of ports to ping if host does not contain a port number
+  ports: 9200
+
+  # Total test connection and data exchange timeout
+  timeout: 16s
+  check:
+    send: 'Check'
+    receive: 'Check'
+
+  # TLS/SSL connection settings:
+  ssl:
+    enabled: true
+    certificate_authorities: ["{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
+    supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+
+  # Required TLS protocols
+  #supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  # The tags of the monitors are included in their own field with each
+  # transaction published. Tags make it easy to group servers by different
+  # logical properties.
+  #tags: ["service-X", "web-tier"]
+
+  # Optional fields that you can specify to add additional information to the
+  # monitor output. Fields can be scalar values, arrays, dictionaries, or any nested
+  # combination of these.
+  #fields:
+  #  env: staging
+
+  # If this option is set to true, the custom fields are stored as top-level
+  # fields in the output document instead of being grouped under a fields
+  # sub-dictionary. Default is false.
+  #fields_under_root: false
