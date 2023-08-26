@@ -1,7 +1,7 @@
 ---
 # tasks file for roles/logstash
 
-- name: "Install Logstash"
+- name: "[Logstash] - Install Logstash"
   become: true
   apt:
     name: 
@@ -10,7 +10,7 @@
       - net-tools
     state: present
 
-- name: "Fix directory permission"
+- name: "[Logstash] - Fix directory permission"
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -25,7 +25,7 @@
     - "{{ logstash_data_dir }}"
     - "{{ logstash_certs_dir }}"
 
-- name: Copy elastic CA Pem logstash
+- name: "[Logstash] - Copy elastic CA Pem logstash"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
     dest: "{{ logstash_certs_dir }}/{{ elasticsearch_ca_pem }}"

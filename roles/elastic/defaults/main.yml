@@ -1,11 +1,18 @@
 ---
+clustername: ""
 es_version: ''
-es_trust_pass: ''
-es_key_pass: ''
 es_heap_size: ''
 
-owner_els: elasticsearch
-group_els: elasticsearch
+es_username: ""
+es_password: ""
+es_new_password: ""
+  
+elastic_host_index: ''
+elastic_host_count: ""
+dns_elastic_list: []
+
+elasticsearch_ca_pem: ""
+elasticsearch_ca_p12: ""
 
 elasticsearch_local: ""
 elasticsearch_path_usr: ""
@@ -19,9 +26,3 @@ elasticsearch_path_source: ""
 elasticsearch_path_key: ""
 elasticsearch_path_keyring: ""
 
-es_username: ''
-es_password: ''
-es_new_password: ''
-
-
-ssh_key_filename: id_rsa

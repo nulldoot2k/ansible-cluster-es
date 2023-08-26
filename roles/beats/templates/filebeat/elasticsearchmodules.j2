@@ -5,8 +5,8 @@
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
     var.paths:
-      - {{ elasticsearch_path_log }}/*.log          
-      - {{ elasticsearch_path_log }}/*_server.json
+      - {{ elasticsearch_log_dir }}/*.log          
+      - {{ elasticsearch_log_dir }}/*_server.json
 
   gc:
     enabled: false

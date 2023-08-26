@@ -6,13 +6,13 @@
 - shell: uname -m
   register: unamem
 
-- name: Install metricbeat
+- name: "Metricbeat - Install Metricbeat"
   apt: 
     name: 
       - "metricbeat={{ es_version }}"
     state: present
 
-- name: Fix directory permission
+- name: "Metricbeat - Fix directory permission"
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -24,19 +24,19 @@
     - "{{ metricbeat_log_dir }}"
     - "{{ metricbeat_certs_dir }}"
 
-- name: Copy elastic CA Pem metricbeat
+- name: "Metricbeat - Copy elastic CA Pem metricbeat"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
     dest: "{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
     mode: 0644
 
-- name: Copy elastic CA P12 metricbeat
+- name: "Metricbeat - Copy elastic CA P12 metricbeat"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
     dest: "{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_p12 }}"
     mode: 0644
 
-- name: Add file metricbeat.yml
+- name: "Metricbeat - Add file metricbeat.yml"
   template:
     src: metricbeat/metricbeat.j2
     dest: "{{ metricbeat_conf_dir }}/metricbeat.yml"
@@ -44,37 +44,37 @@
   notify:
     - reload metricbeat
 
-- name: Reload demon
+- name: "Metricbeat - Reload demon"
   systemd:
     daemon_reload: yes
   notify:
     - Start metricbeat
     - Enable metricbeat
 
-- name: metricbeat elasticsearch
+- name: "Metricbeat modules elasticsearch"
   block:
-    - name: enable elasticsearch
-      shell: 'metricbeat modules enable elasticsearch'
+    - name: "Metricbeat enable modules elasticsearch"
+      shell: "metricbeat modules enable elasticsearch"
 
-    - name: add file /modules.d/elasticsearch.yml
+    - name: "Metricbeat add file modules /modules.d/elasticsearch.yml"
       template:
         src: metricbeat/elasticsearchmodules.j2
         dest: "{{ metricbeat_path_module }}/elasticsearch.yml"
         mode: 0640
   when: inventory_hostname in groups['elastic']
 
-- name: metricbeat kibana
+- name: "Metricbeat modules kibana"
   block:
-    - name: enable elasticsearch
-      shell: 'metricbeat modules enable kibana-xpack'
+    - name: Metricbeat enable modules elasticsearch""
+      shell: "metricbeat modules enable kibana-xpack"
 
-    - name: add file /modules.d/kibanamodules.yml
+    - name: "Metricbeat add file modules /modules.d/kibanamodules.yml"
       template:
         src: metricbeat/kibanamodules.j2
         dest: "{{ metricbeat_path_module }}/kibana-xpack.yml"
         mode: 0640
   when: inventory_hostname in groups['kibana']
 
-- name: restart elasticsearch
+- name: "Metricbeat restart service"
   become: true
-  shell: 'systemctl restart metricbeat.service'
+  shell: "systemctl restart metricbeat.service"

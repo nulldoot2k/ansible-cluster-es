@@ -1,37 +1,37 @@
 ---
 
-- name: ensure common
+- name: "Ensure common"
   tags: ['common']
   hosts: [ all ]
   become: true
   roles: [ common ]
 
-- name: ensure elastic
+- name: "Ensure elastic"
   tags: ['elastic']
   gather_facts: true
   become: true
   hosts: [ elastic ]
   roles: [ elastic ]
 
-- name: ensure kibana
+- name: "Ensure kibana"
   tags: ['kibana']
   become: true
   hosts: [ kibana ]
   roles: [ kibana ]
     
-- name: ensure logstash
+- name: E"nsure logstash"
   tags: ['logsash']
   become: true
   hosts: logstash
   roles: [ logstash ]
 
-- name: ensure beats
+- name: "Ensure beats"
   tags: ['beats']
   become: true
   hosts: beats
   roles: [ beats ]
 
-- name: uninsall elk stack
+- name: "Uninsall elk stack"
   tags: ['uninstall']
   become: true
   hosts: uninstall

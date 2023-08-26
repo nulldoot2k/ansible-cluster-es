@@ -1,29 +1,29 @@
 ---
 
 # Update packages for cluster elk
-- name: "Update system packages"
+- name: "[Common] - Update system packages"
   become: true
   shell: "apt update && apt update --fix-missing -y"
 
-- name: "Fix common Java configuration issues"
+- name: "[Common] - Fix common Java configuration issues"
   shell: "dpkg --configure -a"
 
-- name: "Install Java and other packages"
+- name: "[Common] - Install Java and other packages"
   apt: 
     name: "{{ es_package }}"
     state: present
     update_cache: yes
 
-- name: "Check if PGP key file exists"
+- name: "[Common] - Check if PGP key file exists"
   stat:
     path: "{{ elasticsearch_path_keyring }}"
   register: check_gpg_key
       
-- name: "Add Elasticsearch GPG key"
+- name: "[Common] - Add Elasticsearch GPG key"
   shell: "wget -qO - {{ elasticsearch_path_gpg }} | sudo gpg --dearmor -o {{ elasticsearch_path_keyring }}"
   when: not check_gpg_key.stat.exists
 
-- name: "Add Elasticsearch APT repository"
+- name: "[Common] - Add Elasticsearch APT repository"
   copy:
     dest: "{{ elasticsearch_path_source }}/{{ es_pack_version }}"
     content: |
@@ -31,11 +31,11 @@
   become: true
   become_user: "{{ owner }}"
 
-- name: "Update system packages cache"
+- name: "[Common] - Update system packages cache"
   apt:
     update_cache: yes
 
-- name: "Install Elasticsearch"
+- name: "[Common] - Install Elasticsearch"
   apt: 
     name: "{{ clustername }}={{ es_version }}"
     state: present

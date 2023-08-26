@@ -6,13 +6,13 @@
 - shell: uname -m
   register: unamem
 
-- name: is heartbeat installed
+- name: "Heartbeat - Installed Heartbeat"
   apt: 
     name: 
       - "heartbeat-elastic={{ es_version }}"
     state: present
       
-- name: Fix directory permission
+- name: "Heartbeat - Fix directory permission"
   file:
     path: "{{ item }}"
     state: directory
@@ -24,31 +24,31 @@
     - "{{ heartbeat_log_dir }}"
     - "{{ heartbeat_certs_dir }}"
 
-- name: Copy elastic CA Pem heartbeat
+- name: "Heartbeat - Copy elastic CA Pem heartbeat"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
     dest: "{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
     mode: 0644
 
-- name: Copy elastic CA P12 heartbeat
+- name: "Heartbeat - Copy elastic CA P12 heartbeat"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
     dest: "{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_p12 }}"
     mode: 0644
       
-- name: Add heartbeat configuration modules tcp file
+- name: "Heartbeat Add heartbeat configuration modules tcp file"
   template:
     src: heartbeat/tcp.yml.j2
     dest: "{{ heartbeat_conf_dir }}/monitors.d/tcp.yml"
     mode: 0644
       
-- name: Add heartbeat configuration modules icmp file
+- name: "Heartbeat - Add heartbeat configuration modules icmp file"
   template:
     src: heartbeat/icmp.yml.j2
     dest: "{{ heartbeat_conf_dir }}/monitors.d/icmp.yml"
     mode: 0644
       
-- name: Render heartbeat configuration file
+- name: "Heartbeat - Render heartbeat configuration file"
   template:
     src: heartbeat/heartbeat.yml.j2
     dest: "{{ heartbeat_conf_dir }}/heartbeat.yml"
@@ -56,13 +56,13 @@
   notify:
     - reload heartbeat
 
-- name: Reload demon
+- name: "Heartbeat - Reload demon"
   systemd:
     daemon_reload: yes
   notify:
     - Start heartbeat-elastic
     - Enable heartbeat-elastic
 
-- name: restart elasticsearch
+- name: "Heartbeat restart service"
   become: true
-  shell: 'systemctl restart heartbeat-elastic.service'
+  shell: "systemctl restart heartbeat-elastic.service"

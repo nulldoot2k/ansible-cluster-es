@@ -1,31 +1,28 @@
 ---
-# Commons parameters for all ELK Stack
-es_major_version: "8.x"
-es_version: "8.3.3"
-es_use_repository: true
-es_repo_base: "https://artifacts.elastic.co"
-es_apt_key: "{{ es_repo_base }}/GPG-KEY-elasticsearch"
-es_apt_url: "deb {{ es_repo_base }}/packages/{{ es_repo_name }}/apt stable main"
-es_apt_url_old: "deb http://packages.elastic.co/elasticsearch/{{ es_repo_name }}/debian stable main"
-#Elasticsearch username and password
-kibana_install_oss: false
-kibana_package_name: "kibana"
-kibana_version_lock: false
-kibana_start_service: true
-kibana_restart_on_change: true
-kibana_user: kibana
-kibana_group: kibana
-kibana_config:
-    server.name: "{{ inventory_hostname }}"
-    server.port: 5601
-    server.host: "{{ ansible_default_ipv4.address }}"
-    elasticsearch.hosts: "http://{{ ansible_default_ipv4.address }}:9200"
-    elasticsearch.username: "{{ es_user}}"
-    elasticsearch.password: "{{ es_pass }}"
+# kibana
+es_version: ""
+ki_port: ""
 
-# Need to provide default directories
-kibana_data_dirs: ""
+ki_username: ""
+ki_password: ""
+
+dns_kibana: ""
+
+# Path kibana 
+kibana_conf_dir: ""
 kibana_log_dir: ""
-kibana_allow_downgrades: false
-kibana_api_host: localhost
-kibana_api_port: 5601
+kibana_certs_dir: ""
+kibana_pid_dir: ""
+kibana_data_dir: ""
+
+elasticsearch_ca_pem: ""
+elasticsearch_ca_p12: ""
+    
+ki_owner: "kibana"
+ki_groups: "kibana"
+ki_service: "kibana"
+    
+# nginx
+nginx_conf_dir: "/etc/nginx/"
+nginx_avai_dir: "{{ nginx_conf_dir }}/sites-available"
+nginx_enab_dir: "{{ nginx_conf_dir }}/sites-enabled"

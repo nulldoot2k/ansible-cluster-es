@@ -1,17 +1,17 @@
 ---
 
 # Overwrite file hosts | set default
-- name: "Set new hostname for groups"
+- name: "[Common] - Set new hostname for groups"
   hostname:
     name: "{{ inventory_hostname }}"
 
-- name: "Update hostname in {{ hostname_conf_dir }}"
+- name: "[Common] - Update hostname in {{ hostname_conf_dir }}"
   lineinfile:
     path: "{{ hostname_conf_dir }}"
     regexp: '^.*$'
     line: "{{ inventory_hostname }}"
 
-- name: "Overwrite hosts file with updated entries"
+- name: "[Common] - Overwrite hosts file with updated entries"
   become: true
   template:
     src: hosts.j2

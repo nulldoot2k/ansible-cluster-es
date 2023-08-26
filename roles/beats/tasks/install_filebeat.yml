@@ -6,13 +6,13 @@
 - shell: uname -m
   register: unamem
     
-- name: Install filebeat
+- name: "Filebeat - Install filebeat"
   apt: 
     name:
       - "filebeat={{ es_version }}"
     state: present
 
-- name: Fix directory permission
+- name: "Filebeat - Fix directory permission"
   file:
     path: "{{ item }}"
     state: directory
@@ -24,19 +24,19 @@
     - "{{ filebeat_log_dir }}"
     - "{{ filebeat_certs_dir }}"
 
-- name: Copy elastic CA Pem filebeat
+- name: "Filebeat - Copy elastic CA Pem filebeat"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
     dest: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
     mode: 0644
 
-- name: Copy elastic CA P12 filebeat
+- name: "Filebeat - Copy elastic CA P12 filebeat"
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
     dest: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_p12 }}"
     mode: 0644
       
-- name: Add file filebeat.yml
+- name: "Filebeat - Add file filebeat.yml"
   template:
     src: filebeat/filebeat.j2
     dest: "{{ filebeat_conf_dir }}/filebeat.yml"
@@ -44,37 +44,37 @@
   notify:
     - reload filebeat
 
-- name: Reload demon
+- name: "Filebeat - Reload demon"
   systemd:
     daemon_reload: yes
   notify:
     - Start filebeat
     - Enable filebeat
 
-- name: filebeat elasticsearch
+- name: "Filebeat Modules Elasticsearch"
   block:
-    - name: enable elasticsearch
-      shell: 'filebeat modules enable elasticsearch'
+    - name: "Filebeat enable modules elasticsearch"
+      shell: "filebeat modules enable elasticsearch"
 
-    - name: add file /modules.d/elasticsearch.yml
+    - name: "Filebeat add file modules /modules.d/elasticsearch.yml"
       template:
         src: filebeat/elasticsearchmodules.j2
         dest: "{{ filebeat_path_module }}/elasticsearch.yml"
         mode: 0640
   when: inventory_hostname in groups['elastic']
 
-- name: filebeat kibana
+- name: "Filebeat Modules Kibana"
   block:
-    - name: enable kibana
-      shell: 'filebeat modules enable kibana'
+    - name: "Filebeat enable modules kibana"
+      shell: "filebeat modules enable kibana"
 
-    - name: add file /modules.d/kibanamodules.yml
+    - name: "Filebeat add file modules /modules.d/kibanamodules.yml"
       template:
         src: filebeat/kibanamodules.j2
         dest: "{{ filebeat_path_module }}/kibana.yml"
         mode: 0640
   when: inventory_hostname in groups['kibana']
 
-- name: restart elasticsearch
+- name: "Filebeat restart service"
   become: true
   shell: 'systemctl restart filebeat.service'

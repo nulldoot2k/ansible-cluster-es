@@ -1,6 +1,6 @@
 input {
 	beats {
-		port => {{ logstash_beats_tcp_port }}
+		port => {{ lo_port }}
 	}
 }
 
@@ -8,7 +8,7 @@ input {
 
 output {
 	elasticsearch {
-		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:9200"{% if not loop.last %},{% endif %}{% endfor %}]
+		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
 		index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
 		user => "{{ es_username }}"
 		password => "{{ es_password }}"

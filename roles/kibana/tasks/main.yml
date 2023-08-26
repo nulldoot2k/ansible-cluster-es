@@ -1,33 +1,32 @@
 ---
 
-- name: "Install Kibana"
+- name: "[Kibana] - Install Kibana"
   become: true
   apt:
     name:
       - "kibana={{ es_version }}"
     state: present
 
-- name: "Daemon Reload Ki"
+- name: "[Kibana] - Daemon Reload"
   systemd:
     daemon_reload: yes
   notify:
     - Start "{{ ki_service }}"
     - Enable "{{ ki_service }}"
 
-- name: "Create folder certs"
+- name: "[Kibana] - Create folder certs"
   file:
     path: "{{ kibana_certs_dir }}"
     state: directory
     owner: "{{ ki_owner }}"
     group: "{{ ki_groups }}"
 
-- name: "Copy files from cloned folder kibana-server to destination"
-  tags: add-key-elastic
+- name: "[Kibana] - Copy files from cloned folder kibana-server to destination"
   copy:
     src: "{{ elasticsearch_local }}/kibana-server/"
     dest: "{{ kibana_certs_dir }}"
     
-- name: "Fix directory permission"
+- name: "[Kibana] - Fix directory permission"
   file:
     path: "{{ item }}"
     state: directory
@@ -42,7 +41,7 @@
     - "{{ kibana_data_dir }}"
     - "{{ kibana_log_dir }}"
 
-- name: "Add file kibana.yml"
+- name: "[Kibana] - Add file kibana.yml"
   template:
     src: kibana.yml.j2
     dest: "{{ kibana_conf_dir }}/kibana.yml"
@@ -50,26 +49,26 @@
     group: "{{ ki_groups }}"
     mode: 0660
 
-- name: "Check Status Kibana"
+- name: "[Kibana] - Check Status Kibana"
   systemd:
     name: "{{ ki_service }}"
     state: started
   register: kibana_status
 
-- name: "Restart and start Kibana service"
+- name: "[Kibana] - Restart/start Kibana service"
   systemd:
     name: "{{ ki_service }}"
     state: "{{ 'started' if kibana_status.status == 'running' else 'restarted' }}"
 
-- name: "Create passwd nginx reverse proxy"
+- name: "[Kibana] - Create passwd nginx reverse proxy"
   shell: "sudo htpasswd -b -c {{ nginx_conf_dir }}/.htpasswd.kibana {{ es_username }} {{ es_password }}"
 
-- name: "Copy file nginx reverse"
+- name: "[Kibana] - Copy file nginx reverse"
   template:
     src: devops.kibana.cloud.j2
     dest: "{{ nginx_avai_dir }}/devops.kibana.cloud"
 
-- name: "Create symbolic link if not exists"
+- name: "[Kibana] - Create symbolic link if not exists"
   become: true
   file:
     src: "{{ nginx_avai_dir }}/devops.kibana.cloud"
@@ -77,10 +76,10 @@
     state: link
     force: no
 
-- name: "Iptable nginx"
+- name: "[Kibana] - Iptable drop nginx"
   shell: "sudo iptables -A INPUT -p tcp --dport 80 ! -s 127.0.0.1 -j DROP"
 
-- name: restart Nginx
+- name: "[Kibana] - Restart service Nginx"
   systemd:
     name: nginx
     state: restarted

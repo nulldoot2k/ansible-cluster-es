@@ -1,16 +1,21 @@
-# elasticsearch
-
+# all cluster
+# email nulldoot2k@proton.me
+# -- Elk --
 clustername: "elasticsearch"
 es_version: "8.3.3"
+lo_version: "1:8.3.3-1"
+ca_trusted_fingerprint: '4B427648ADA723A58368D1B33BBB883274DF6B4BFD12171A2612432552BB35C9'
+
+# --- Comoon ----
 es_pack_version: "elastic-8.x.list"
+es_major_version: "8.x"
 elasticsearch_path_source: "/etc/apt/sources.list.d"
 elasticsearch_path_key: "/usr/share/keyrings"
 elasticsearch_path_keyring: "/usr/share/keyrings/elasticsearch-keyring.gpg"
 elasticsearch_path_gpg: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
 elasticsearch_path_apt: "https://artifacts.elastic.co/packages/8.x/apt"
 
-es_pub: "admin@gmail.com"
-
+# -- Packages --
 es_package: 
   - openjdk-8-jdk
   - apt-transport-https
@@ -20,43 +25,58 @@ es_package:
   - jq
   - apache2-utils
 
+# -- Key SSH --
+es_pub: "admin@gmail.com"
 ssh_pri_dir: "~/.ssh/id_rsa"
 ssh_pub_dir: "~/.ssh/id_rsa.pub"
+ssh_key_filename: id_rsa
+ 
+# -- Key Elk --
+elasticsearch_ca_pem: "elasticsearch-ca.pem"
+elasticsearch_ca_p12: "elasticsearch-ca.p12"
+elasticsearch_https_enabled: "yes"
+elasticsearch_security_enabled: "yes"
 
-es_trust_pass: ''
-es_key_pass: ''
-es_heap_size: "1g"
-
-kibana_ssl: "true"
-
-es_port: "9200"
-ki_port: "5601"
-lo_port: "5044"
-
-es_username: "elastic"
-es_password: "password"
-es_new_password: "password"
-ki_username: "kibana_system"
-ki_password: "password"
-
-# DNS
+# -- DNS --
 elastic_host_index: 1
 elastic_host_count: "{{ groups['elastic'] | length }}"
 dns_elastic_list: []
 dns_kibana: "devops.kibana.cloud"
+IP: "{{ groups['cluster'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
 
+# -- User and password --
 owner: "root"
 es_owner: "elasticsearch"
 es_groups: "elasticsearch"
 ki_owner: "kibana"
 ki_groups: "kibana"
 ki_service: "kibana"
+lo_groups: "logstash"
+lo_owner: "logstash"
 
-IP: "{{ groups['cluster'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
-ca_trusted_fingerprint: '4B427648ADA723A58368D1B33BBB883274DF6B4BFD12171A2612432552BB35C9'
+# -- Password --
+es_username: "elastic"
+es_password: "password"
+es_new_password: "password"
+ki_username: "kibana_system"
+ki_password: "password"
 
-elasticsearch_master_is_also_data_node:
+# -- Port ELK --
+es_port: "9200" # elastic
+ki_port: "5601" # kibana
+lo_port: "5044" # logstash
+
+# -- Parameter MEM --
+es_heap_size: "1g" # elastic
+lo_jvm_xmx: "1g" # logstash
+lo_jvm_xms: "1g" # logstash
+setup_kibana_dashboards: yes
+
+# Roles Cluster ELK
+# master
+elasticsearch_master_is_also_data_node: 
   - data
+# worker
 elasticsearch_default_node_roles: 
   - master
   - ingest
@@ -64,10 +84,8 @@ elasticsearch_default_node_roles:
   - remote_cluster_client
   - transform
 
-es_major_version: "8.x"
-
-# Path elastic
-
+# ###### PATH ###################
+# Path elasticsearch
 elasticsearch_local: "./files"
 elasticsearch_usr_dir: "/usr/share/elasticsearch"
 elasticsearch_bin_dir: "/usr/share/elasticsearch/bin"
@@ -80,36 +98,58 @@ elasticsearch_cert_elastic_dir: "/usr/share/elasticsearch/http"
 elasticsearch_cert_kibana_dir: "/usr/share/elasticsearch/kibana-server"
 
 # Path kibana 
+kibana_conf_dir: "/etc/kibana"
+kibana_log_dir: "/var/log/kibana"
+kibana_certs_dir: "/etc/kibana/certs"
+kibana_pid_dir: "/var/run/kibana"
+kibana_data_dir: "/var/lib/kibana"
 
-kibana_conf_dir: /etc/kibana
-kibana_log_dir: /var/log/kibana
-kibana_certs_dir: /etc/kibana/certs
-kibana_pid_dir: /var/run/kibana
-kibana_data_dir: /var/lib/kibana
-
-metricbeat_path_etc: "/etc/metricbeat"
-metricbeat_path_cert: "/etc/metricbeat/certs"
-metricbeat_path_module: "/etc/metricbeat/modules.d"
-
+# Path filebeat
 filebeat_path_etc: "/etc/filebeat"
 filebeat_path_cert: "/etc/filebeat/certs"
 filebeat_path_module: "/etc/filebeat/modules.d"
 
-lo_version: "1:8.3.3-1"
+# -- Path logstash -- 
 logstash_conf_dir: "/etc/logstash"
 logstash_log_dir: "/var/log/logstash"
 logstash_pid_dir: "/var/run/logstash"
 logstash_certs_dir: "/etc/logstash/certs"
 logstash_data_dir: "/var/lib/logstash"
 
-logstash_jvm_xmx: "1g"
-logstash_jvm_xms: "1g"
+# -- Path filebeat --
+filebeat_conf_dir: "/etc/filebeat"
+filebeat_certs_dir: "/etc/filebeat/certs"
+filebeat_data_dir: "/var/lib/filebeat"
+filebeat_log_dir: "/var/log/filebeat"
+filebeat_number_of_shards: "1"
+filebeat_number_of_replicas: "1"
 
+# -- Path metricbeat --
+metricbeat_conf_dir: "/etc/metricbeat"
+metricbeat_certs_dir: "/etc/metricbeat/certs"
+metricbeat_data_dir: "/var/lib/metricbeat"
+metricbeat_log_dir: "/var/log/metricbeat"
+metricbeat_path_module: "/etc/metricbeat/modules.d"
+metricbeat_number_of_shards: "1"
+metricbeat_number_of_replicas: "1"
+
+# -- Path heartbeat --
+heartbeat_conf_dir: "/etc/heartbeat"
+heartbeat_certs_dir: "/etc/heartbeat/certs"
+heartbeat_data_dir: "/var/lib/heartbeat"
+heartbeat_log_dir: "/var/log/heartbeat"
+heartbeat_number_of_shards: "1"
+heartbeat_number_of_replicas: "1"
+heartbeat_number_of_shards: 1
+heartbeat_number_of_replicas: 1
+
+# -- Path Nginx --
 nginx_conf_dir: "/etc/nginx/"
 nginx_avai_dir: "{{ nginx_conf_dir }}/sites-available"
 nginx_enab_dir: "{{ nginx_conf_dir }}/sites-enabled"
 
+# -- Path Hosts --
 hosts_conf_dir: "/etc/hosts"
 hostname_conf_dir: "/etc/hostname"
-ssh_key_filename: id_rsa
 
+elasticsearch_hosts: []
