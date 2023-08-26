@@ -174,4 +174,4 @@
         state: absent
       with_items: "{{ files_to_remove.files }}"
       when: "'kibana' in group_names"
-  when: "'remove-key' in ansible_skip_tags"
+  when: "'remove-key' in ansible_run_tags"

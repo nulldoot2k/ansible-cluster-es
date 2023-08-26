@@ -1,6 +1,6 @@
 ---
 
-- name: Copy files from cloned folder http to destination
+- name: "[Elastic] - Copy files from cloned folder http to destination"
   tags: add-key-elastic
   copy:
     src: "{{ elasticsearch_local }}/http/"
@@ -8,13 +8,13 @@
 
 # keystore
  
-- name: "Check if secure in keystore exists"
+- name: "[Elastic] - Check if secure in keystore exists"
   tags: elastic-keystone
   stat:
     path: "{{ elasticsearch_conf_dir }}/elasticsearch.keystore"
   register: keystore_file
 
-- name: "Remove secure password from keystore {{ item }}"
+- name: "[Elastic] - Remove secure password from keystore {{ item }}"
   become: true
   become_user: "{{ es_owner }}"
   tags: elastic-keystone
@@ -24,9 +24,9 @@
     - "xpack.security.transport.ssl.truststore.secure_password"
     - "xpack.security.http.ssl.keystore.secure_password"
   ignore_errors: yes
-  when: "keystore_file.stat.exists == true"
+  when: keystore_file.stat.exists == true
 
-- name: "Add secure password to keystore {{ item }}"
+- name: "[Elastic] - Add secure password to keystore {{ item }}"
   tags: elastic-keystone
   become: true
   become_user: "{{ es_owner }}"
@@ -38,7 +38,7 @@
     - "bootstrap.password"
   ignore_errors: yes
 
-- name: "Add file config elasticsearch.yml"
+- name: "[Elastic] - Add file config elasticsearch.yml"
   tags: add-file-elastic
   template:
     src: "elasticsearch.yml.j2"
@@ -47,7 +47,7 @@
     group: "{{ es_groups }}"
     mode: '0660'
 
-- name: "Add file config heapsize"
+- name: "[Elastic] - Add file config heapsize"
   template:
     src: "jvm.options.j2"
     dest: "{{ elasticsearch_conf_dir }}/jvm.options"
@@ -55,7 +55,7 @@
     group: "{{ es_groups }}"
     mode: '0660'
 
-- name: "Daemon service ES"
+- name: "[Elastic] - Daemon service ES"
   shell: "sudo /bin/systemctl daemon-reload"
 
 - name: "Ensure elasticsearch service is running"
@@ -65,37 +65,42 @@
     state: started
   register: response
 
-- name: "Check elasticsearch service status"
+- name: "[Elastic] - Check elasticsearch service status"
   debug:
     msg: "Elasticsearch service is {{ 'running' if response.changed else 'stopped' }}"
       
-- name: "Restart master service {{ clustername }}"
+- name: "[Elastic] - Restart master service {{ clustername }}"
   tags: elastic-master
   systemd:
     name: "{{ clustername }}"
     state: restarted
     daemon_reexec: yes
     daemon_reload: yes
-  when: "inventory_hostname in groups['elastic_master']"
+  when: inventory_hostname in groups['elastic_master']
     
-- name: "Reset passwd elastic"
-  shell: 'printf "{{ es_password }}\n{{ es_new_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ es_username }}'
-  when: "inventory_hostname in groups['elastic_ca']"
+- name: "[Elastic] - Wait for 10 seconds"
+  pause:
+    seconds: 10
+  when: inventory_hostname in groups['elastic_master']
+      
+- name: "[Elastic] - Reset passwd elastic"
+  shell: 'printf "{{ es_password }}\n{{ es_new_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ es_username }} -f'
+  when: inventory_hostname in groups['elastic_ca']
 
-- name: "Reset-passwd-kibana"
+- name: "[Elastic] - Reset-passwd-kibana"
   shell: 'printf "{{ ki_password }}\n{{ ki_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ ki_username }}'
-  when: "inventory_hostname in groups['elastic_ca']"
+  when: inventory_hostname in groups['elastic_ca']
 
-- name: Restart worker
+- name: "[Elastic] - Restart worker"
   tags: elastic-worker
   systemd:
     name: "{{ clustername }}"
     state: restarted
     daemon_reexec: yes
     daemon_reload: yes
-  when: "inventory_hostname in groups['elastic_data']"
+  when: inventory_hostname in groups['elastic_data']
     
-- name: "Enable service Elasticsearch"
+- name: "[Elastic] - Enable service Elasticsearch"
   service:
     name: "{{ clustername }}"
     enabled: yes

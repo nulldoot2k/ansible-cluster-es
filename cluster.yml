@@ -19,7 +19,7 @@
   hosts: [ kibana ]
   roles: [ kibana ]
     
-- name: E"nsure logstash"
+- name: "Ensure logstash"
   tags: ['logsash']
   become: true
   hosts: logstash
@@ -31,7 +31,7 @@
   hosts: beats
   roles: [ beats ]
 
-- name: "Uninsall elk stack"
+- name: "Uninstall elk stack"
   tags: ['uninstall']
   become: true
   hosts: uninstall

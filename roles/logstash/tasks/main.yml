@@ -14,8 +14,8 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    owner: "{{ logstash_user }}"
-    group: "{{ logstash_group }}"
+    owner: "{{ lo_owner }}"
+    group: "{{ lo_groups }}"
     recurse: yes
     mode: u=rwX,g=rX,o-rwx
   loop:
@@ -29,24 +29,24 @@
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.pem"
     dest: "{{ logstash_certs_dir }}/{{ elasticsearch_ca_pem }}"
-    owner: "{{ logstash_user }}"
-    group: "{{ logstash_group }}"
+    owner: "{{ lo_owner }}"
+    group: "{{ lo_groups }}"
     mode: 0644
 
 - name: Copy elastic CA P12 logstash
   copy:
     src: "{{ elasticsearch_local }}/http/elastic-certificates.p12"
     dest: "{{ logstash_certs_dir }}/{{ elasticsearch_ca_p12 }}"
-    owner: "{{ logstash_user }}"
-    group: "{{ logstash_group }}"
+    owner: "{{ lo_owner }}"
+    group: "{{ lo_groups }}"
     mode: 0644
 
 - name: "Render logstash yml configuration file"
   template:
     src: logstash.yml.j2
     dest: "{{ logstash_conf_dir }}/logstash.yml"
-    owner: "{{ logstash_user }}"
-    group: "{{ logstash_group }}"
+    owner: "{{ lo_owner }}"
+    group: "{{ lo_groups }}"
     mode: 0644
   notify:
     - reload systemd
@@ -55,16 +55,16 @@
   template:
     src: logstash.conf.j2
     dest: "{{ logstash_conf_dir }}/conf.d/logstash.conf"
-    owner: "{{ logstash_user }}"
-    group: "{{ logstash_group }}"
+    owner: "{{ lo_owner }}"
+    group: "{{ lo_groups }}"
     mode: 0644
 
 - name: "Render logstash JVM configuration file"
   template:
     src: jvm.options.j2
     dest: "{{ logstash_conf_dir }}/jvm.options"
-    owner: "{{ logstash_user }}"
-    group: "{{ logstash_group }}"
+    owner: "{{ lo_owner }}"
+    group: "{{ lo_groups }}"
     mode: 0644
 
 - name: "Enable and start logstash"

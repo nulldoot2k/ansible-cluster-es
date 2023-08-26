@@ -1,53 +1,48 @@
 ---
 # tasks file for roles/remove
-- name: Disable service before remove
-  shell: if systemctl is-enabled --quiet {{ item }}; then systemctl disable {{ item }} && echo disable_ok ; fi
-  register: output
-  changed_when: "'disable_ok' in output.stdout"
-  loop:
-    - elasticsearch
-    - kibana
-    - metricbeat
-    - filebeat
-    - logstash
-    - nginx
-    - heartbeat-elastic
+- name: "[Uninstall] - Cluster Elk"
+  block:
+    - name: "[Uninstall] - Disable service before remove"
+      shell: "if systemctl is-enabled --quiet {{ item }}; then systemctl disable {{ item }} && echo disable_ok ; fi"
+      register: output
+      changed_when: "'disable_ok' in output.stdout"
+      loop:
+        - elasticsearch
+        - kibana
+        - metricbeat
+        - filebeat
+        - logstash
+        - nginx
+        - heartbeat-elastic
+          
+    - name: "[Uninstall] - Purge ELK packages"
+      shell: "sudo apt purge --remove -y elasticsearch kibana logstash metricbeat filebeat nginx nginx-full nginx-common heartbeat-elastic"
+      ignore_errors: yes
+
+    - name: "[Uninstall] - autoremove package"
+      shell: "sudo apt autoremove -y"
+
+    - name: "[Uninstall] - Delete ELK directories"
+      become: true
+      shell: "rm -rf /usr/share/{{ item }}/ /etc/{{ item }}/ /var/lib/{{ item }}/ /var/log/{{ item }}/"
+      loop:
+        - elasticsearch
+        - kibana
+        - logstash
+        - filebeat
+        - metricbeat
+        - heartbeat
+        - nginx
+
+    - name: "[Uninstall] - remove pgp"
+      shell: "sudo rm -rf {{ elasticsearch_path_keyring }}"
+
+    - name: "[Uninstall] - remove source"
+      shell: "sudo rm -rf {{ elasticsearch_path_source }}/{{ es_pack_version }}"
       
-- name: Purge ELK packages
-  shell: "sudo apt purge --remove -y elasticsearch kibana logstash metricbeat filebeat nginx nginx-full nginx-common heartbeat-elastic"
-  ignore_errors: yes
+    - name: "[Uninstall] - update package"
+      shell: "sudo apt -y autoremove"
 
-- name: autoremove package
-  shell: "sudo apt autoremove -y"
-
-- name: "Delete ELK directories"
-  become: true
-  shell: "rm -rf /usr/share/{{ item }}/ /etc/{{ item }}/ /var/lib/{{ item }}/ /var/log/{{ item }}/"
-  loop:
-    - filebeat
-    - elasticsearch
-    - logstash
-    - kibana
-    - metricbeat
-    - logstash
-    - kibana
-    - elasticsearch
-    - filebeat
-    - kibana
-    - logstash
-    - filebeat
-    - metricbeat
-    - nginx
-    - heartbeat
-
-- name: remove pgp
-  shell: "sudo rm -rf {{ elasticsearch_path_keyring }}"
-
-- name: remove source
-  shell: "sudo rm -rf {{ elasticsearch_path_source }}/{{ es_pack_version }}"
-  
-- name: update package
-  shell: "sudo apt -y autoremove"
-
-- name: update package
-  shell: "sudo apt-get update"
+    - name: "[Uninstall] - update package"
+      shell: "sudo apt-get update"
+  when: "'uninstall' in ansible_run_tags"

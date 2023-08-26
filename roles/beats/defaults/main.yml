@@ -1,5 +1,4 @@
 ---
-beats_extract_dir: /opt
 beats_version: ''
 
 beats_monitoring_enabled: no
@@ -7,31 +6,29 @@ filebeat_monitoring_port: 5066
 metricbeat_monitoring_port: 5067
 heartbeat_monitoring_port: 5068
 
-filebeat_conf_dir: "/etc/filebeat"
-filebeat_certs_dir: "/etc/filebeat/certs"
-filebeat_data_dir: "/var/lib/filebeat"
-filebeat_log_dir: "/var/log/filebeat"
+filebeat_conf_dir: ""
+filebeat_certs_dir: ""
+filebeat_data_dir: ""
+filebeat_log_dir: ""
 filebeat_number_of_shards: "1"
 filebeat_number_of_replicas: "1"
 
-metricbeat_conf_dir: "/etc/metricbeat"
-metricbeat_certs_dir: "/etc/metricbeat/certs"
-metricbeat_data_dir: "/var/lib/metricbeat"
-metricbeat_log_dir: "/var/log/metricbeat"
+metricbeat_conf_dir: ""
+metricbeat_certs_dir: ""
+metricbeat_data_dir: ""
+metricbeat_log_dir: ""
 metricbeat_number_of_shards: "1"
 metricbeat_number_of_replicas: "1"
 
-heartbeat_conf_dir: "/etc/heartbeat"
-heartbeat_certs_dir: "/etc/heartbeat/certs"
-heartbeat_data_dir: "/var/lib/heartbeat"
-heartbeat_log_dir: "/var/log/heartbeat"
+heartbeat_conf_dir: ""
+heartbeat_certs_dir: ""
+heartbeat_data_dir: ""
+heartbeat_log_dir: ""
 heartbeat_number_of_shards: "1"
 heartbeat_number_of_replicas: "1"
 
 setup_kibana_dashboards: ''
 
-elasticsearch_https_enabled: yes
-elasticsearch_security_enabled: yes
 elasticsearch_local_certs_dir: ''
 elasticsearch_ca_pem: ""
 elasticsearch_ca_p12: ""

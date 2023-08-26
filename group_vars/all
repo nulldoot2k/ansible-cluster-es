@@ -51,8 +51,8 @@ es_groups: "elasticsearch"
 ki_owner: "kibana"
 ki_groups: "kibana"
 ki_service: "kibana"
-lo_groups: "logstash"
 lo_owner: "logstash"
+lo_groups: "logstash"
 
 # -- Password --
 es_username: "elastic"
@@ -140,8 +140,6 @@ heartbeat_data_dir: "/var/lib/heartbeat"
 heartbeat_log_dir: "/var/log/heartbeat"
 heartbeat_number_of_shards: "1"
 heartbeat_number_of_replicas: "1"
-heartbeat_number_of_shards: 1
-heartbeat_number_of_replicas: 1
 
 # -- Path Nginx --
 nginx_conf_dir: "/etc/nginx/"

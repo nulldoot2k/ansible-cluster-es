@@ -20,7 +20,7 @@ server {
   auth_basic_user_file {{ nginx_conf_dir }}/.htpasswd.kibana;
 
   location / {
-    proxy_pass https://kibana};
+    proxy_pass https://kibana;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';
