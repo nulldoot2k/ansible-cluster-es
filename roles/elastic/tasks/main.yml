@@ -2,11 +2,11 @@
 
 - setup:
   
-- name: check preflight task
+- name: "Check preflight task"
   include_tasks: preflight.yml
 
-- name: install elasticsearch
+- name: "Install {{ clustername }}"
   include: install-elastic.yml
 
-- name: config elastic
+- name: "Config {{ clustername }}"
   include: config-elastic.yml

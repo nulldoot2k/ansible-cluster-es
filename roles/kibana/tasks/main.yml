@@ -1,88 +1,83 @@
 ---
 
-- name: Install Kibana and apache2-utils
+- name: "Install Kibana"
   become: true
   apt:
     name:
       - "kibana={{ es_version }}"
-      - apache2-utils
     state: present
 
-- name: daemon Reload
+- name: "Daemon Reload Ki"
   systemd:
     daemon_reload: yes
   notify:
     - Start "{{ ki_service }}"
     - Enable "{{ ki_service }}"
 
-- name: create folder certs
+- name: "Create folder certs"
   file:
-    path: "{{ kibana_path_cert }}"
+    path: "{{ kibana_certs_dir }}"
     state: directory
-    owner: "{{ owner_ki }}"
-    group: "{{ group_ki }}"
+    owner: "{{ ki_owner }}"
+    group: "{{ ki_groups }}"
 
-- name: Copy files from cloned folder kibana-server to destination
+- name: "Copy files from cloned folder kibana-server to destination"
   tags: add-key-elastic
   copy:
     src: "{{ elasticsearch_local }}/kibana-server/"
-    dest: "{{ kibana_path_cert }}/"
+    dest: "{{ kibana_certs_dir }}"
     
-- name: set permission files in folder certs
-  become: true
-  file: 
-    path: "{{ kibana_path_cert }}/"
-    owner: "{{ owner_ki }}"
-    group: "{{ group_ki }}"
+- name: "Fix directory permission"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ki_owner }}"
+    group: "{{ ki_groups }}"
     recurse: yes
-    state: directory
-    mode: '0660'
+    mode: u=rwX,g=rX,o-rwx
+  loop:
+    - "{{ kibana_conf_dir }}"
+    - "{{ kibana_certs_dir}}"
+    - "{{ kibana_pid_dir}}"
+    - "{{ kibana_data_dir }}"
+    - "{{ kibana_log_dir }}"
 
-- name: set permission folder certs
-  file: 
-    path: "{{ kibana_path_cert }}"
-    state: directory
-    owner: "{{ owner_ki }}"
-    group: "{{ group_ki }}"
-    mode: '0755'
-  become: true
-
-- name: Add file kibana.yml
+- name: "Add file kibana.yml"
   template:
-    src: kibana.j2
-    dest: "{{ kibana_path_conf }}/kibana.yml"
-    owner: "{{ owner_ki }}"
-    group: "{{ group_ki }}"
+    src: kibana.yml.j2
+    dest: "{{ kibana_conf_dir }}/kibana.yml"
+    owner: "{{ ki_owner }}"
+    group: "{{ ki_groups }}"
     mode: 0660
 
-- name: Check Kibana
+- name: "Check Status Kibana"
   systemd:
     name: "{{ ki_service }}"
     state: started
   register: kibana_status
 
-- name: Restart or start Kibana service
+- name: "Restart and start Kibana service"
   systemd:
     name: "{{ ki_service }}"
     state: "{{ 'started' if kibana_status.status == 'running' else 'restarted' }}"
 
-- name: Create passwd nginx reverse proxy
-  shell: 'sudo htpasswd -b -c {{ default_nginx_path }}/.htpasswd.kibana elastic password'
+- name: "Create passwd nginx reverse proxy"
+  shell: "sudo htpasswd -b -c {{ nginx_conf_dir }}/.htpasswd.kibana {{ es_username }} {{ es_password }}"
 
-- name: copy file nginx reverse
+- name: "Copy file nginx reverse"
   template:
     src: devops.kibana.cloud.j2
-    dest: "{{ nginx_path_site_avai }}/devops.kibana.cloud"
+    dest: "{{ nginx_avai_dir }}/devops.kibana.cloud"
 
-- name: Create symbolic link if not exists
+- name: "Create symbolic link if not exists"
   become: true
   file:
-    src: "{{ nginx_path_site_avai }}/devops.kibana.cloud"
-    dest: "{{ nginx_path_site_enab }}/devops.kibana.cloud"
+    src: "{{ nginx_avai_dir }}/devops.kibana.cloud"
+    dest: "{{ nginx_enab_dir }}/devops.kibana.cloud"
     state: link
     force: no
 
-- name: iptable nginx
+- name: "Iptable nginx"
   shell: "sudo iptables -A INPUT -p tcp --dport 80 ! -s 127.0.0.1 -j DROP"
 
 - name: restart Nginx

@@ -1,5 +1,5 @@
 upstream kibana {
-  server 127.0.0.1:{{ kibana_port }};
+  server 127.0.0.1:{{ ki_port }};
 }
 
 server {
@@ -13,14 +13,14 @@ server {
 
   server_name {{ dns_kibana }};
 
-  ssl_certificate {{ kibana_path_cert }}/kibana.crt;
-  ssl_certificate_key {{ kibana_path_cert }}/kibana.key;
+  ssl_certificate {{ kibana_certs_dir }}/kibana.crt;
+  ssl_certificate_key {{ kibana_certs_dir }}/kibana.key;
 
   auth_basic "Restricted Access";
-  auth_basic_user_file {{ default_nginx_path }}/.htpasswd.kibana;
+  auth_basic_user_file {{ nginx_conf_dir }}/.htpasswd.kibana;
 
   location / {
-    proxy_pass https://{{ ki_service }};
+    proxy_pass https://{{ dns_kibana }};
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';

@@ -1,14 +1,14 @@
-server.port: {{ kibana_port }}
+server.port: {{ ki_port }}
 
 server.host: 0.0.0.0
 
-server.publicBaseUrl: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ kibana_port }}"
+server.publicBaseUrl: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ ki_port }}"
 
 server.ssl.enabled: true
 
-server.ssl.certificate: {{ kibana_path_cert }}/kibana.crt
+server.ssl.certificate: {{ kibana_certs_dir }}/kibana.crt
 
-server.ssl.key: {{ kibana_path_cert }}/kibana.key
+server.ssl.key: {{ kibana_certs_dir }}/kibana.key
 
 elasticsearch.hosts:
 {% for host in groups['elastic'] %}
@@ -18,18 +18,18 @@ elasticsearch.hosts:
 elasticsearch.username: "{{ ki_username }}"
 elasticsearch.password: "{{ ki_password }}"
 
-elasticsearch.ssl.certificateAuthorities: [ "{{ kibana_path_cert }}/elastic-certificates.pem" ]
+elasticsearch.ssl.certificateAuthorities: [ "{{ kibana_certs_dir }}/elastic-certificates.pem" ]
 monitoring.ui.ccs.enabled: true
 
 logging:
   appenders:
     file:
       type: file
-      fileName: {{ kibana_path_logs }}/kibana.log
+      fileName: {{ kibana_log_dir }}/kibana.log
       layout:
         type: json
   root:
     appenders:
       - default
       - file
-pid.file: {{ kibana_path_runs }}/kibana.pid
+pid.file: {{ kibana_pid_dir }}/kibana.pid

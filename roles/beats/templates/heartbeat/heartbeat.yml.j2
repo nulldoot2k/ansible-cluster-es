@@ -18,7 +18,7 @@ heartbeat.monitors:
   # Human readable display name for this service in Uptime UI and elsewhere
   name: My Monitor
   # List or urls to query
-  urls: ["localhost:9200"] 
+  urls: ["localhost:{{ es_port }}"] 
   # Configure task schedule
   schedule: '@every 10s'
   # Total test connection and data exchange timeout
@@ -54,7 +54,7 @@ setup.template.settings:
 {% if setup_kibana_dashboards %}
 # =================================== Kibana ===================================
 setup.kibana:
-  host: {% for host in groups['kibana'] -%} "https://{{ hostvars[host]['ansible_host'] }}:5601" {% endfor %}
+  host: {% for host in groups['kibana'] -%} "https://{{ hostvars[host]['ansible_host'] }}:{{ ki_port }}" {% endfor %}
   
   ssl:
     enabled: true

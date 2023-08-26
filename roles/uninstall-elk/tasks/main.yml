@@ -41,10 +41,10 @@
     - heartbeat
 
 - name: remove pgp
-  shell: "sudo rm -rf /usr/share/keyrings/elasticsearch-keyring.gpg"
+  shell: "sudo rm -rf {{ elasticsearch_path_keyring }}"
 
 - name: remove source
-  shell: "sudo rm -rf /etc/apt/sources.list.d/elastic-8.x.list"
+  shell: "sudo rm -rf {{ elasticsearch_path_source }}/{{ es_pack_version }}"
   
 - name: update package
   shell: "sudo apt -y autoremove"

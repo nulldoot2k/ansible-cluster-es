@@ -11,7 +11,7 @@
   period: 10s
   hosts: 
   {% for host in groups['elastic'] %}
-  - "https://{{ hostvars[host]['ansible_host'] }}:9200"
+  - "https://{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"
   {% endfor %}
 
   username: "{{ es_username }}"

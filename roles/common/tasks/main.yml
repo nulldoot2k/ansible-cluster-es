@@ -1,19 +1,19 @@
 --- 
 
-- name: setup hostname
+- name: "Setup Hostname"
   include: hostname.yml
   tags: hostname
 
-- name: install package
+- name: "Install Package"
   include: package.yml
   tags: package
 
-- name: install ssh
+- name: "Setup SSH"
   include: ssh.yml
   tags: ssh
   when: inventory_hostname in groups['elastic_ca']
 
-- name: install certs
+- name: "Setup certs"
   include: certs.yml
   tags: certs
   when: inventory_hostname in groups['elastic_ca']

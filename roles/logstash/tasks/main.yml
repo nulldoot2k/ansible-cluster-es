@@ -5,7 +5,7 @@
   become: true
   apt:
     name: 
-      - "logstash=1:8.3.3-1"
+      - "logstash={{ lo_version}}"
       - nginx
       - net-tools
     state: present

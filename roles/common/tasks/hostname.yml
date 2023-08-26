@@ -5,9 +5,9 @@
   hostname:
     name: "{{ inventory_hostname }}"
 
-- name: "Update hostname in {{ hostname_path }}"
+- name: "Update hostname in {{ hostname_conf_dir }}"
   lineinfile:
-    path: "{{ path_hostname }}"
+    path: "{{ hostname_conf_dir }}"
     regexp: '^.*$'
     line: "{{ inventory_hostname }}"
 
@@ -15,4 +15,4 @@
   become: true
   template:
     src: hosts.j2
-    dest: "{{ path_hosts }}"
+    dest: "{{ hosts_conf_dir }}"

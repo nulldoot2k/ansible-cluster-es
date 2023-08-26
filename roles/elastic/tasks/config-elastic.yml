@@ -4,50 +4,33 @@
   tags: add-key-elastic
   copy:
     src: "{{ elasticsearch_local }}/http/"
-    dest: "{{ elasticsearch_path_cert }}"
-
-- name: set permission files in folder certs
-  become: true
-  file: 
-    path: "{{ elasticsearch_path_cert }}/"
-    owner: root
-    group: elasticsearch
-    recurse: yes
-    state: directory
-    mode: '0660'
-
-- name: set permission folder certs
-  file: 
-    path: "{{ elasticsearch_path_cert }}"
-    state: directory
-    owner: "root"
-    group: elasticsearch
-    mode: '0760'
+    dest: "{{ elasticsearch_certs_dir }}"
 
 # keystore
  
-- name: keystore exists
+- name: "Check if secure in keystore exists"
   tags: elastic-keystone
   stat:
-    path: "{{ elasticsearch_path_etc }}/elasticsearch.keystore"
+    path: "{{ elasticsearch_conf_dir }}/elasticsearch.keystore"
   register: keystore_file
 
-- name: "Remove secure password to keystore {{ item }}"
+- name: "Remove secure password from keystore {{ item }}"
   become: true
+  become_user: "{{ es_owner }}"
   tags: elastic-keystone
-  shell: "/usr/share/elasticsearch/bin/elasticsearch-keystore remove {{ item }}"
+  shell: "{{ elasticsearch_bin_dir }}/elasticsearch-keystore remove {{ item }}"
   with_items:
     - "xpack.security.transport.ssl.keystore.secure_password"
     - "xpack.security.transport.ssl.truststore.secure_password"
     - "xpack.security.http.ssl.keystore.secure_password"
-    # - "xpack.security.http.ssl.truststore.secure_password"
   ignore_errors: yes
   when: "keystore_file.stat.exists == true"
 
 - name: "Add secure password to keystore {{ item }}"
   tags: elastic-keystone
   become: true
-  shell: "echo password | sudo -n /usr/share/elasticsearch/bin/elasticsearch-keystore add -x -f {{ item }}"
+  become_user: "{{ es_owner }}"
+  shell: "echo password | {{ elasticsearch_bin_dir }}/elasticsearch-keystore add -x -f {{ item }}"
   with_items:
     - "xpack.security.transport.ssl.keystore.secure_password"
     - "xpack.security.transport.ssl.truststore.secure_password"
@@ -55,89 +38,64 @@
     - "bootstrap.password"
   ignore_errors: yes
 
-- name: "Add file elasticsearch.yml"
+- name: "Add file config elasticsearch.yml"
   tags: add-file-elastic
   template:
-    src: elasticsearch.j2
-    dest: "{{ elasticsearch_path_etc }}/elasticsearch.yml"
-    owner: root
-    group: "{{ group_els }}"
-    mode: 0660
+    src: "elasticsearch.yml.j2"
+    dest: "{{ elasticsearch_conf_dir }}/elasticsearch.yml"
+    owner: "{{ es_owner }}"
+    group: "{{ es_groups }}"
+    mode: '0660'
 
-- name: Add file jvm.options
+- name: "Add file config heapsize"
   template:
-    src: jvm.options.j2
-    dest: "/etc/elasticsearch/jvm.options"
-    owner: root
-    group: "{{ group_els }}"
-    mode: 0660
+    src: "jvm.options.j2"
+    dest: "{{ elasticsearch_conf_dir }}/jvm.options"
+    owner: "{{ es_owner }}"
+    group: "{{ es_groups }}"
+    mode: '0660'
 
-- name: set permission again
-  become: true
-  file: 
-    path: "{{ elasticsearch_path_cert }}"
-    state: directory
-    owner: root
-    group: elasticsearch
-    mode: '2755'
-
-# - name: Find files in /var/lib/elasticsearch/ folder
-#   tags: elastic-master
-#   find:
-#     paths: "/var/lib/elasticsearch/"
-#     patterns: "*"
-#   register: files_to_remove
-#   when: "inventory_hostname == groups['elastic'][0]"
-#
-# - name: Remove files in /var/lib/elasticsearch/ folder
-#   tags: elastic-master
-#   file:
-#     path: "{{ item.path }}"
-#     state: absent
-#   with_items: "{{ files_to_remove.files }}"
-#   when: "inventory_hostname == groups['elastic'][0]"
-      
-- name: daemon service
+- name: "Daemon service ES"
   shell: "sudo /bin/systemctl daemon-reload"
 
-- name: Ensure elasticsearch service is running
+- name: "Ensure elasticsearch service is running"
   systemd:
-    name: elasticsearch
+    name: "{{ clustername }}"
     enabled: yes
     state: started
   register: response
 
-- name: Check elasticsearch service status
+- name: "Check elasticsearch service status"
   debug:
     msg: "Elasticsearch service is {{ 'running' if response.changed else 'stopped' }}"
       
-- name: Restart master
+- name: "Restart master service {{ clustername }}"
   tags: elastic-master
   systemd:
-    name: elasticsearch
+    name: "{{ clustername }}"
     state: restarted
     daemon_reexec: yes
     daemon_reload: yes
-  when: inventory_hostname in groups['elastic_master']
+  when: "inventory_hostname in groups['elastic_master']"
     
-- name: reset-passwd-elastic
-  shell: 'printf "{{ es_password }}\n{{ es_new_password }}" | {{ elasticsearch_path_bin }}/elasticsearch-reset-password -b -i -u {{ es_username }}'
+- name: "Reset passwd elastic"
+  shell: 'printf "{{ es_password }}\n{{ es_new_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ es_username }}'
   when: "inventory_hostname in groups['elastic_ca']"
 
-- name: reset-passwd-kibana
-  shell: 'printf "{{ ki_password }}\n{{ ki_password }}" | {{ elasticsearch_path_bin }}/elasticsearch-reset-password -b -i -u {{ ki_username }}'
+- name: "Reset-passwd-kibana"
+  shell: 'printf "{{ ki_password }}\n{{ ki_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ ki_username }}'
   when: "inventory_hostname in groups['elastic_ca']"
 
 - name: Restart worker
   tags: elastic-worker
   systemd:
-    name: elasticsearch
+    name: "{{ clustername }}"
     state: restarted
     daemon_reexec: yes
     daemon_reload: yes
-  when: inventory_hostname in groups['elastic_data']
+  when: "inventory_hostname in groups['elastic_data']"
     
-- name: Enable Elasticsearch
+- name: "Enable service Elasticsearch"
   service:
-    name: elasticsearch
+    name: "{{ clustername }}"
     enabled: yes

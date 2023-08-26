@@ -1,22 +1,24 @@
+---
+
 - name: "Check if SSH key exists"
   stat:
-    path: ~/.ssh/id_rsa
+    path: "{{ ssh_pri_dir }}"
   register: ssh_key_file
 
 - name: "Generate SSH key pair"
   shell: >
-    ssh-keygen -q -b 4096 -t rsa -N "" -C "admin@gmail.com" -f ~/.ssh/id_rsa
+    ssh-keygen -q -b 4096 -t rsa -N "" -C {{ es_pub }} -f {{ ssh_pri_dir }}
   ignore_errors: true
   when: ssh_key_file.stat.exists == false
 
 - name: "Print SSH public key"
-  command: "cat ~/.ssh/id_rsa.pub"
+  command: "cat {{ ssh_pub_dir }}"
   register: ssh_public_key
   changed_when: false
 
 - name: "Fetch public key from the elastic node"
   fetch:
-    src: "~/.ssh/id_rsa.pub"
+    src: "{{ ssh_pub_dir }}"
     dest: "{{ role_path }}/files/"
     flat: yes
 

@@ -2,7 +2,7 @@
 
 - name: ensure common
   tags: ['common']
-  hosts: [ cluster, logstash ]
+  hosts: [ all ]
   become: true
   roles: [ common ]
 
@@ -20,7 +20,7 @@
   roles: [ kibana ]
     
 - name: ensure logstash
-  tags: ['logstash']
+  tags: ['logsash']
   become: true
   hosts: logstash
   roles: [ logstash ]

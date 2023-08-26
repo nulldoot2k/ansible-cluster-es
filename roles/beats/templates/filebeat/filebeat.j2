@@ -70,7 +70,7 @@ setup.template.settings:
 # =================================== Kibana ===================================
 
 setup.kibana:
-  host: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ kibana_port }}"
+  host: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ ki_port }}"
   ssl:
      enabled: true
      certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"

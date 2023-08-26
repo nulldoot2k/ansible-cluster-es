@@ -10,12 +10,7 @@
 
 - name: "Install Java and other packages"
   apt: 
-    name: 
-      - openjdk-8-jdk
-      - apt-transport-https
-      - unzip
-      - net-tools
-      - nginx 
+    name: "{{ es_package }}"
     state: present
     update_cache: yes
 
@@ -25,16 +20,16 @@
   register: check_gpg_key
       
 - name: "Add Elasticsearch GPG key"
-  shell: "wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o {{ elasticsearch_path_keyring }}"
+  shell: "wget -qO - {{ elasticsearch_path_gpg }} | sudo gpg --dearmor -o {{ elasticsearch_path_keyring }}"
   when: not check_gpg_key.stat.exists
 
 - name: "Add Elasticsearch APT repository"
   copy:
-    dest: "{{ elasticsearch_path_source }}/elastic-8.x.list"
+    dest: "{{ elasticsearch_path_source }}/{{ es_pack_version }}"
     content: |
-      deb [signed-by={{ elasticsearch_path_keyring }}] https://artifacts.elastic.co/packages/8.x/apt stable main
+      deb [signed-by={{ elasticsearch_path_keyring }}] {{ elasticsearch_path_apt }} stable main
   become: true
-  become_user: root
+  become_user: "{{ owner }}"
 
 - name: "Update system packages cache"
   apt:
@@ -42,6 +37,6 @@
 
 - name: "Install Elasticsearch"
   apt: 
-    name: "elasticsearch={{ es_version }}"
+    name: "{{ clustername }}={{ es_version }}"
     state: present
   when: inventory_hostname in groups['elastic_ca']

@@ -2,30 +2,54 @@
 
 clustername: "elasticsearch"
 es_version: "8.3.3"
+es_pack_version: "elastic-8.x.list"
+elasticsearch_path_source: "/etc/apt/sources.list.d"
+elasticsearch_path_key: "/usr/share/keyrings"
+elasticsearch_path_keyring: "/usr/share/keyrings/elasticsearch-keyring.gpg"
+elasticsearch_path_gpg: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+elasticsearch_path_apt: "https://artifacts.elastic.co/packages/8.x/apt"
+
+es_pub: "admin@gmail.com"
+
+es_package: 
+  - openjdk-8-jdk
+  - apt-transport-https
+  - unzip
+  - net-tools
+  - nginx 
+  - jq
+  - apache2-utils
+
+ssh_pri_dir: "~/.ssh/id_rsa"
+ssh_pub_dir: "~/.ssh/id_rsa.pub"
+
 es_trust_pass: ''
 es_key_pass: ''
 es_heap_size: "1g"
+
 kibana_ssl: "true"
+
 es_port: "9200"
+ki_port: "5601"
+lo_port: "5044"
+
 es_username: "elastic"
 es_password: "password"
 es_new_password: "password"
+ki_username: "kibana_system"
+ki_password: "password"
 
 # DNS
 elastic_host_index: 1
 elastic_host_count: "{{ groups['elastic'] | length }}"
 dns_elastic_list: []
-
-owner_els: "elasticsearch"
-group_els: "elasticsearch"
-
-ki_username: "kibana_system"
-ki_password: "password"
-
 dns_kibana: "devops.kibana.cloud"
-owner_ki: "kibana"
-group_ki: "kibana"
-kibana_port: "5601"
+
+owner: "root"
+es_owner: "elasticsearch"
+es_groups: "elasticsearch"
+ki_owner: "kibana"
+ki_groups: "kibana"
 ki_service: "kibana"
 
 IP: "{{ groups['cluster'] | map('extract', hostvars, ['ansible_host']) | join(',') }}"
@@ -42,25 +66,26 @@ elasticsearch_default_node_roles:
 
 es_major_version: "8.x"
 
-# Path
+# Path elastic
 
 elasticsearch_local: "./files"
-elasticsearch_path_usr: "/usr/share/elasticsearch"
-elasticsearch_path_bin: "/usr/share/elasticsearch/bin"
-elasticsearch_path_etc: "/etc/elasticsearch"
-elasticsearch_path_cert: "/etc/elasticsearch/certs"
-elasticsearch_path_lib: "/var/lib/elasticsearch"
-elasticsearch_path_log: "/var/log/elasticsearch"
-elasticsearch_path_cert_kibana: "/usr/share/elasticsearch/kibana-server"
-elasticsearch_path_source: "/etc/apt/sources.list.d"
-elasticsearch_path_key: "/usr/share/keyrings"
-elasticsearch_path_keyring: "/usr/share/keyrings/elasticsearch-keyring.gpg"
+elasticsearch_usr_dir: "/usr/share/elasticsearch"
+elasticsearch_bin_dir: "/usr/share/elasticsearch/bin"
+elasticsearch_conf_dir: "/etc/elasticsearch"
+elasticsearch_pid_dir: "/var/run/elasticsearch"
+elasticsearch_certs_dir: "/etc/elasticsearch/certs"
+elasticsearch_data_dir: "/var/lib/elasticsearch"
+elasticsearch_log_dir: "/var/log/elasticsearch"
+elasticsearch_cert_elastic_dir: "/usr/share/elasticsearch/http"
+elasticsearch_cert_kibana_dir: "/usr/share/elasticsearch/kibana-server"
 
+# Path kibana 
 
-kibana_path_cert: "/etc/kibana/certs"
-kibana_path_conf: "/etc/kibana"
-kibana_path_logs: "/var/log/kibana"
-kibana_path_runs: "/run/kibana"
+kibana_conf_dir: /etc/kibana
+kibana_log_dir: /var/log/kibana
+kibana_certs_dir: /etc/kibana/certs
+kibana_pid_dir: /var/run/kibana
+kibana_data_dir: /var/lib/kibana
 
 metricbeat_path_etc: "/etc/metricbeat"
 metricbeat_path_cert: "/etc/metricbeat/certs"
@@ -70,10 +95,21 @@ filebeat_path_etc: "/etc/filebeat"
 filebeat_path_cert: "/etc/filebeat/certs"
 filebeat_path_module: "/etc/filebeat/modules.d"
 
-default_nginx_path: "/etc/nginx/"
-nginx_path_site_avai: "{{ default_nginx_path }}/sites-available"
-nginx_path_site_enab: "{{ default_nginx_path }}/sites-enabled"
+lo_version: "1:8.3.3-1"
+logstash_conf_dir: "/etc/logstash"
+logstash_log_dir: "/var/log/logstash"
+logstash_pid_dir: "/var/run/logstash"
+logstash_certs_dir: "/etc/logstash/certs"
+logstash_data_dir: "/var/lib/logstash"
 
-path_hosts: "/etc/hosts"
-path_hostname: "/etc/hostname"
+logstash_jvm_xmx: "1g"
+logstash_jvm_xms: "1g"
+
+nginx_conf_dir: "/etc/nginx/"
+nginx_avai_dir: "{{ nginx_conf_dir }}/sites-available"
+nginx_enab_dir: "{{ nginx_conf_dir }}/sites-enabled"
+
+hosts_conf_dir: "/etc/hosts"
+hostname_conf_dir: "/etc/hostname"
 ssh_key_filename: id_rsa
+

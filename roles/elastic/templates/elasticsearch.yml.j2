@@ -16,8 +16,8 @@ node.roles:
 {% endif %}
 
 path:
-  data: {{ elasticsearch_path_lib }}
-  logs: {{ elasticsearch_path_log }}
+  data: {{ elasticsearch_data_dir }}
+  logs: {{ elasticsearch_log_dir }}
 
 network.host: 0.0.0.0
 
@@ -34,7 +34,6 @@ cluster.initial_master_nodes:
 {% endfor %}
 
 xpack.security.enabled: true
-
 xpack.security.enrollment.enabled: true
 xpack.monitoring.collection.enabled: true
 

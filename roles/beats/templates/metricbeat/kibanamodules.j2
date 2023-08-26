@@ -12,7 +12,7 @@ metricbeat.modules:
   period: 10s
   hosts: 
   {% for host in groups['kibana'] %}
-  - "https://{{ hostvars[host]['ansible_host'] }}:5601"
+  - "https://{{ hostvars[host]['ansible_host'] }}:{{ ki_port }}"
   {% endfor %}
 
   username: "{{ ki_username }}"
