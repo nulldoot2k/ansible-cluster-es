@@ -35,7 +35,9 @@ cluster.initial_master_nodes:
 
 xpack.security.enabled: true
 xpack.security.enrollment.enabled: true
+{% if 'elastic_master' in groups %}
 xpack.monitoring.collection.enabled: true
+{% endif %}
 
 xpack.security.http.ssl:
   enabled: true
