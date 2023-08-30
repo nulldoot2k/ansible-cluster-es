@@ -38,6 +38,7 @@ xpack.security.enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endi
 xpack.security.enrollment.enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endif %}
 
 xpack.monitoring.collection.enabled: true
+{% endif %}
 
 xpack.security.http.ssl:
   enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endif %}
