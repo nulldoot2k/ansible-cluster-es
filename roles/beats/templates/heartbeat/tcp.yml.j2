@@ -33,10 +33,12 @@
     receive: 'Check'
 
   # TLS/SSL connection settings:
+  {% if elk_auth_ssl == "yes" %}
   ssl:
     enabled: true
     certificate_authorities: ["{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
     supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]
+  {% endif %}
 
   # Required TLS protocols
   #supported_protocols: ["TLSv1.0", "TLSv1.1", "TLSv1.2"]

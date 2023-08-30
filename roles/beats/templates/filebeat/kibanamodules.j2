@@ -2,8 +2,8 @@
 
   access:
     enabled: true
-    var.paths: ["{{ kibana_log_dir }}/kibana.log*"]
+    var.paths: ["{{ kibana_log_dir }}/*.log"]
 
   error:
     enabled: true
-    var.paths: ["{{ kibana_log_dir }}/kibana.log*"]
+    var.paths: ["{{ kibana_log_dir }}/*.log"]

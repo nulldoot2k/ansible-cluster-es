@@ -6,12 +6,13 @@
 ## IMPORTANT: JVM heap size
 ################################################################
 
-{%if es_heap_size is defined %}
--Xms{{ es_heap_size }}
--Xmx{{ es_heap_size }}
-{% else %}
--Xms2g
--Xmx2g
+{%if inventory_hostname in groups['elastic_master'] %}
+-Xms{{ es_heap_master }}
+-Xmx{{ es_heap_master }}
+{% endif %}
+{%if inventory_hostname in groups['elastic_data'] %}
+-Xms{{ es_heap_data }}
+-Xmx{{ es_heap_data }}
 {% endif %}
 
 ##

@@ -37,6 +37,7 @@
     mode: 0644
       
 - name: "Filebeat - Add file filebeat.yml"
+  tags: add-file-filebeat-conf
   template:
     src: filebeat/filebeat.j2
     dest: "{{ filebeat_conf_dir }}/filebeat.yml"

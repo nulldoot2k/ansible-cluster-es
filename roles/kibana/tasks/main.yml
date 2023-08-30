@@ -42,6 +42,7 @@
     - "{{ kibana_log_dir }}"
 
 - name: "[Kibana] - Add file kibana.yml"
+  tags: add-file-kibana-conf
   template:
     src: kibana.yml.j2
     dest: "{{ kibana_conf_dir }}/kibana.yml"
@@ -83,3 +84,10 @@
   systemd:
     name: nginx
     state: restarted
+  when: elk_auth_ssl == "yes"
+    
+- name: "[Kibana] - Stopped service Nginx"
+  systemd:
+    name: nginx
+    state: stopped
+  when: elk_auth_ssl == "no"

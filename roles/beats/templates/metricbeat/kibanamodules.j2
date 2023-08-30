@@ -11,6 +11,7 @@ metricbeat.modules:
     - status
   period: 10s
   hosts: 
+  {% if elk_auth_ssl == "yes" %}
   {% for host in groups['kibana'] %}
   - "https://{{ hostvars[host]['ansible_host'] }}:{{ ki_port }}"
   {% endfor %}
@@ -18,3 +19,8 @@ metricbeat.modules:
   username: "{{ ki_username }}"
   password: "{{ ki_password }}"
   ssl.certificate_authorities: ["{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
+  {% else %}
+  {% for host in groups['kibana'] %}
+  - "http://{{ hostvars[host]['ansible_host'] }}:{{ ki_port }}"
+  {% endfor %}
+  {% endif %}

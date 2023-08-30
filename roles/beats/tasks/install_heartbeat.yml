@@ -56,6 +56,10 @@
   notify:
     - reload heartbeat
 
+- name: "Heartbeat Daemon Reload"
+  become: true
+  shell: "systemctl daemon-reload"
+
 - name: "Heartbeat - Reload demon"
   systemd:
     daemon_reload: yes

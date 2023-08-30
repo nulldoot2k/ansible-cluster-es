@@ -67,6 +67,10 @@
     group: "{{ lo_groups }}"
     mode: 0644
 
+- name: "Logstash - Daemon reload"      
+  become: true
+  shell: "systemctl daemon-reload"
+      
 - name: "Enable and start logstash"
   systemd:
     name: logstash 

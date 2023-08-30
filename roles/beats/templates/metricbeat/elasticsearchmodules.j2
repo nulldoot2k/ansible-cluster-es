@@ -10,6 +10,7 @@
     - shard
   period: 10s
   hosts: 
+  {% if elk_auth_ssl == "yes" %}
   {% for host in groups['elastic'] %}
   - "https://{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"
   {% endfor %}
@@ -17,3 +18,9 @@
   username: "{{ es_username }}"
   password: "{{ es_password }}"
   ssl.certificate_authorities: ["{{ metricbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
+  {% else %}
+
+  {% for host in groups['elastic'] %}
+  - "http://{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"
+  {% endfor %}
+  {% endif %}

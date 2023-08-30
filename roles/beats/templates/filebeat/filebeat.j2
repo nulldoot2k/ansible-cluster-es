@@ -33,7 +33,7 @@ filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml
 
   # Set to true to enable config reloading
-  reload.enabled: false
+  reload.enabled: true
 
   # Period on which files under path should be checked for changes
   #reload.period: 10s
@@ -48,9 +48,6 @@ setup.template.settings:
 
 
 # ================================== General ===================================
-
-# The name of the shipper that publishes the network data. It can be used to group
-# all the transactions sent by a single shipper in the web interface.
 #name:
 
 # The tags of the shipper are included in their own field with each
@@ -67,15 +64,26 @@ setup.template.settings:
 
 #setup.dashboards.url:
 
+
+{% if setup_kibana_dashboards == "yes" %}
 # =================================== Kibana ===================================
-
 setup.kibana:
-  host: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ ki_port }}"
+{% if elk_auth_ssl == "yes" %}
+  host:
+  {% for host in groups['kibana'] %}
+  - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+  {% endfor %}
+  
   ssl:
-     enabled: true
-     certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
-
-  #space.id:
+    enabled: true
+    certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
+  {% else %}
+  host:
+  {% for host in groups['kibana'] %}
+  - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+  {% endfor %}
+{% endif %}
+{% endif %}
 
 # =============================== Elastic Cloud ================================
 
@@ -88,32 +96,43 @@ setup.kibana:
 # Configure what output to use when sending the data collected by the beat.
 
 # ---------------------------- Elasticsearch Output ----------------------------
-# output.elasticsearch:
+
+{% if output_log_elastic == "yes" %}
+output.elasticsearch:
   # Array of hosts to connect to.
-  # hosts: 
-  # {% for host in groups['elastic'] %}
-  # - {{ hostvars[host]['ansible_host'] }}
-  # {% endfor %}
+  {% if eyes == "yes" %}
+  hosts: 
+  {% for host in groups['elastic'] %}
+  - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+  {% endfor %}
 
-  # Protocol - either `http` (default) or `https`.
-  # protocol: "https"
+    # Protocol - either `http` (default) or `https`.
+  protocol: "https"
 
-  # Authentication credentials - either API key or username/password.
-  #api_key: "id:api_key"
-  # username: "{{ es_username }}"
-  # password: "{{ es_password }}"
-  # ssl:
-  #    enabled: true
-  #    certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
-     # ca_trusted_fingerprint: "{{ ca_trusted_fingerprint }}"
+    # Authentication credentials - either API key or username/password.
+    #api_key: "id:api_key"
+  username: "{{ es_username }}"
+  password: "{{ es_password }}"
+  ssl:
+     enabled: true
+     certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
+  {% else %}
+  hosts: 
+  {% for host in groups['elastic'] %}
+    - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+  {% endfor %}
+  {% endif %}
+{% endif %}
      
 # ------------------------------ Logstash Output -------------------------------
+{% if output_log_logstash == "yes" %}
 output.logstash:
   # The Logstash hosts
   hosts: 
   {% for host in groups['logstash'] %}
-  - {{ hostvars[host]['ansible_host'] }}
+  - {{ hostvars[host]['ansible_host'] }}:{{ lo_port }}
   {% endfor %}
+{% endif %}
 
   # Optional SSL. By default is off.
   # List of root certificates for HTTPS server verifications

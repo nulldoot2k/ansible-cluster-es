@@ -39,7 +39,7 @@
   ignore_errors: yes
 
 - name: "[Elastic] - Add file config elasticsearch.yml"
-  tags: add-file-elastic
+  tags: add-file-elastic-conf
   template:
     src: "elasticsearch.yml.j2"
     dest: "{{ elasticsearch_conf_dir }}/elasticsearch.yml"
@@ -48,6 +48,7 @@
     mode: '0660'
 
 - name: "[Elastic] - Add file config heapsize"
+  tags: add-file-elastic-heap
   template:
     src: "jvm.options.j2"
     dest: "{{ elasticsearch_conf_dir }}/jvm.options"
@@ -84,12 +85,14 @@
   when: inventory_hostname in groups['elastic_master']
       
 - name: "[Elastic] - Reset passwd elastic"
+  tags: reset-password-elastic
   shell: 'printf "{{ es_password }}\n{{ es_new_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ es_username }} -f'
-  when: inventory_hostname in groups['elastic_ca']
+  when: inventory_hostname in groups['elastic_ca'] and elk_auth_ssl == "yes"
 
 - name: "[Elastic] - Reset-passwd-kibana"
+  tags: reset-password-kibana
   shell: 'printf "{{ ki_password }}\n{{ ki_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ ki_username }}'
-  when: inventory_hostname in groups['elastic_ca']
+  when: inventory_hostname in groups['elastic_ca'] and elk_auth_ssl == "yes"
 
 - name: "[Elastic] - Restart worker"
   tags: elastic-worker

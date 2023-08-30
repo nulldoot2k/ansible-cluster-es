@@ -20,7 +20,7 @@
   roles: [ kibana ]
     
 - name: "Ensure logstash"
-  tags: ['logsash']
+  tags: ['logstash']
   become: true
   hosts: logstash
   roles: [ logstash ]

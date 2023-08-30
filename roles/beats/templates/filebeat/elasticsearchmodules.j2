@@ -9,25 +9,36 @@
       - {{ elasticsearch_log_dir }}/*_server.json
 
   gc:
-    enabled: false
+    enabled: true
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
-    #var.paths:
+    var.paths: 
+      - {{ elasticsearch_log_dir }}/gc.log.[0-9]*
+      - {{ elasticsearch_log_dir }}/gc.log
 
   audit:
-    enabled: false
+    enabled: true
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
-    #var.paths:
+    var.paths:
+      - {{ elasticsearch_log_dir }}/*_access.log
+      - {{ elasticsearch_log_dir }}/*_audit.json
 
   slowlog:
-    enabled: false
+    enabled: true
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
-    #var.paths:
+    var.paths:
+      - {{ elasticsearch_log_dir }}/*_index_search_slowlog.log
+      - {{ elasticsearch_log_dir }}/*index_indexing_slowlog.log
+      - {{ elasticsearch_log_dir }}/*_index_search_slowlog.json
+      - {{ elasticsearch_log_dir }}/*index_indexing_slowlog.json
+ 
 
   deprecation:
-    enabled: false
+    enabled: true
     # Set custom paths for the log files. If left empty,
     # Filebeat will choose the paths depending on your OS.
-    #var.paths:
+    var.paths:
+      - {{ elasticsearch_log_dir }}/*deprecation.log
+      - {{ elasticsearch_log_dir }}/*deprecation.json

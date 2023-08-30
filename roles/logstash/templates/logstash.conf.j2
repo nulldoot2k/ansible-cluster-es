@@ -7,6 +7,7 @@ input {
 ## Add your filters / logstash plugins configuration here
 
 output {
+{% if elk_auth_ssl == "yes" %}
 	elasticsearch {
 		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
 		index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
@@ -15,4 +16,10 @@ output {
 		ssl_certificate_verification => false
     ssl => true
 	}
+{% else %}
+	elasticsearch {
+		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
+		index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
+	}
+{% endif %}
 }

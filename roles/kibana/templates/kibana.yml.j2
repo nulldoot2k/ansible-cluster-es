@@ -2,24 +2,35 @@ server.port: {{ ki_port }}
 
 server.host: 0.0.0.0
 
+{% if elk_auth_ssl == "yes" %}
 server.publicBaseUrl: "https://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ ki_port }}"
+{% else %}
+server.publicBaseUrl: "http://{{ hostvars[groups['kibana'][0]]['ansible_host'] }}:{{ ki_port }}"
+{% endif %}
 
-server.ssl.enabled: true
+server.ssl.enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endif %}
 
+{% if elk_auth_ssl == "yes" %}
 server.ssl.certificate: {{ kibana_certs_dir }}/kibana.crt
-
 server.ssl.key: {{ kibana_certs_dir }}/kibana.key
+{% endif %}
 
 elasticsearch.hosts:
+{% if elk_auth_ssl == "yes" %}
 {% for host in groups['elastic'] %}
   - https://{{ hostvars[host]['ansible_host'] }}:{{ es_port }}
 {% endfor %}
 
 elasticsearch.username: "{{ ki_username }}"
 elasticsearch.password: "{{ ki_password }}"
-
 elasticsearch.ssl.certificateAuthorities: [ "{{ kibana_certs_dir }}/elastic-certificates.pem" ]
-monitoring.ui.ccs.enabled: true
+{% else %}
+{% for host in groups['elastic'] %}
+  - http://{{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+{% endfor %}
+{% endif %}
+
+monitoring.ui.ccs.enabled: false
 
 logging:
   appenders:
