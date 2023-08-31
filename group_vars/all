@@ -78,21 +78,22 @@ lo_port: "5044" # logstash
 
 # -- Parameter MEM --
 es_heap_master: "512m"
-es_heap_data: "1g" # elastic
+es_heap_coordinating: "1g"
+es_heap_data: "2g" # elastic
 lo_jvm_xmx: "1g" # logstash
 lo_jvm_xms: "1g" # logstash
 
 # Roles Cluster ELK
 # master
-elasticsearch_master_is_also_data_node: 
+elasticsearch_data_node: 
   - data
 # worker
-elasticsearch_default_node_roles: 
+elasticsearch_master_node: 
   - master
-  # - ingest
-  # - ml
-  # - remote_cluster_client
-  # - transform
+  - ingest
+  - ml
+  - remote_cluster_client
+  - transform
 
 # ###### PATH ###################
 # Path elasticsearch

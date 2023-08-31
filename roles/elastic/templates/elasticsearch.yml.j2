@@ -4,16 +4,14 @@ cluster.name: {{ clustername }}
 
 node.name: {{inventory_hostname}}
 
-node.roles:
-{% if inventory_hostname in groups['elastic_master'] %}
-{% for role in elasticsearch_default_node_roles %}
-  - {{ role }}
-{% endfor %}
+node.roles: [{% if inventory_hostname in groups['elastic_master'] %}
+{% set roles = elasticsearch_master_node %}
+{% elif inventory_hostname in groups['elastic_data'] %}
+{% set roles = elasticsearch_data_node %}
 {% else %}
-{% for role in elasticsearch_master_is_also_data_node %}
-  - {{ role }}
-{% endfor %}
+{% set roles = [] %}
 {% endif %}
+{{ roles | join(",") }}]
 
 path:
   data: {{ elasticsearch_data_dir }}
@@ -38,7 +36,6 @@ xpack.security.enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endi
 xpack.security.enrollment.enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endif %}
 
 xpack.monitoring.collection.enabled: true
-{% endif %}
 
 xpack.security.http.ssl:
   enabled: {% if elk_auth_ssl == "yes" %}true{% else %}false{% endif %}

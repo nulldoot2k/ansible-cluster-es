@@ -94,6 +94,15 @@
   shell: 'printf "{{ ki_password }}\n{{ ki_password }}" | {{ elasticsearch_bin_dir }}/elasticsearch-reset-password -b -i -u {{ ki_username }}'
   when: inventory_hostname in groups['elastic_ca'] and elk_auth_ssl == "yes"
 
+- name: "[Elastic] - Restart coordinating"
+  tags: elastic-coordinating
+  systemd:
+    name: "{{ clustername }}"
+    state: restarted
+    daemon_reexec: yes
+    daemon_reload: yes
+  when: inventory_hostname in groups['elastic_coordinating']
+  
 - name: "[Elastic] - Restart worker"
   tags: elastic-worker
   systemd:

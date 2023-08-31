@@ -10,6 +10,10 @@
 -Xms{{ es_heap_master }}
 -Xmx{{ es_heap_master }}
 {% endif %}
+{%if inventory_hostname in groups['elastic_coordinating'] %}
+-Xms{{ es_heap_coordinating }}
+-Xmx{{ es_heap_coordinating }}
+{% endif %}
 {%if inventory_hostname in groups['elastic_data'] %}
 -Xms{{ es_heap_data }}
 -Xmx{{ es_heap_data }}
