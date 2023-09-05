@@ -154,6 +154,7 @@ heartbeat_number_of_shards: "1"
 heartbeat_number_of_replicas: "1"
 
 # -- Path Nginx --
+nginx_logs_dir: "/var/log/nginx"
 nginx_conf_dir: "/etc/nginx/"
 nginx_avai_dir: "{{ nginx_conf_dir }}/sites-available"
 nginx_enab_dir: "{{ nginx_conf_dir }}/sites-enabled"
