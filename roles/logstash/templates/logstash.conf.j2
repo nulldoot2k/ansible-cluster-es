@@ -1,5 +1,5 @@
 input {
-{% if output_log_elastic == "yes" %}
+{% if output_log_logstash == "yes" %}
 	beats {
 		port => {{ lo_port }}
 	}
@@ -12,7 +12,7 @@ input {
 }
 
 ## Add your filters / logstash plugins configuration here
-{% if output_log_elastic == "yes" %}
+{% if output_log_logstash == "yes" %}
 filter {}
 {% else %}
 filter {
@@ -46,7 +46,7 @@ filter {
 {% endif %}
 
 output {
-{% if output_log_elastic == "yes" %}
+{% if output_log_logstash == "yes" %}
 	{% if elk_auth_ssl == "yes" %}
 		elasticsearch {
 			hosts => [{% for host in groups['elastic_master'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]

@@ -7,10 +7,7 @@
   
   schedule: '*/5 * * * * * *' # every 5 seconds from start of beat
 
-  hosts: 
-    {% for host in groups['elastic'] -%}
-    - {{ hostvars[host]['ansible_host'] }}
-    {% endfor %}
+  hosts: ["{{hostvars[inventory_hostname].ansible_host}}"] 
 
   ipv4: true
   ipv6: true

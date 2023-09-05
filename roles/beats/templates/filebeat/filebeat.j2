@@ -59,12 +59,6 @@ setup.template.settings:
 #fields:
 #  env: staging
 
-# ================================= Dashboards =================================
-#setup.dashboards.enabled: false
-
-#setup.dashboards.url:
-
-
 {% if setup_kibana_dashboards == "yes" %}
 # =================================== Kibana ===================================
 setup.kibana:
@@ -85,16 +79,6 @@ setup.kibana:
 {% endif %}
 {% endif %}
 
-# =============================== Elastic Cloud ================================
-
-#cloud.id:
-
-#cloud.auth:
-
-# ================================== Outputs ===================================
-
-# Configure what output to use when sending the data collected by the beat.
-
 # ---------------------------- Elasticsearch Output ----------------------------
 
 {% if output_log_elastic == "yes" %}
@@ -102,15 +86,10 @@ output.elasticsearch:
   # Array of hosts to connect to.
   {% if elk_auth_ssl == "yes" %}
   hosts: 
-  {% for host in groups['elastic'] %}
+  {% for host in groups['elastic_master'] %}
   - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
   {% endfor %}
-
-    # Protocol - either `http` (default) or `https`.
   protocol: "https"
-
-    # Authentication credentials - either API key or username/password.
-    #api_key: "id:api_key"
   username: "{{ es_username }}"
   password: "{{ es_password }}"
   ssl:
@@ -118,7 +97,7 @@ output.elasticsearch:
      certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
   {% else %}
   hosts: 
-  {% for host in groups['elastic'] %}
+  {% for host in groups['elastic_master'] %}
     - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
   {% endfor %}
   {% endif %}
@@ -152,49 +131,3 @@ processors:
   - add_docker_metadata: ~
   - add_kubernetes_metadata: ~
 setup.ilm.overwrite: true
-# ================================== Logging ===================================
-
-# Sets log level. The default log level is info.
-# Available log levels are: error, warning, info, debug
-#logging.level: debug
-
-# At debug level, you can selectively enable logging only for some components.
-# To enable all selectors use ["*"]. Examples of other selectors are "beat",
-# "publisher", "service".
-#logging.selectors: ["*"]
-
-# ============================= X-Pack Monitoring ==============================
-
-#monitoring.enabled: false
-
-#monitoring.cluster_uuid:
-
-
-#monitoring.elasticsearch:
-
-# ============================== Instrumentation ===============================
-
-# Instrumentation support for the filebeat.
-#instrumentation:
-    # Set to true to enable instrumentation of filebeat.
-    #enabled: false
-
-    # Environment in which filebeat is running on (eg: staging, production, etc.)
-    #environment: ""
-
-    # APM Server hosts to report instrumentation results to.
-    #hosts:
-    #  - http://localhost:8200
-
-    # API Key for the APM Server(s).
-    # If api_key is set then secret_token will be ignored.
-    #api_key:
-
-    # Secret token for the APM Server(s).
-    #secret_token:
-
-
-# ================================= Migration ==================================
-
-# This allows to enable 6.7 migration aliases
-#migration.6_to_7.enabled: true

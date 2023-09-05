@@ -18,7 +18,7 @@ heartbeat.monitors:
   # Human readable display name for this service in Uptime UI and elsewhere
   name: My Monitor
   # List or urls to query
-  urls: ["localhost:{{ es_port }}"] 
+  urls: ["{{hostvars[inventory_hostname].ansible_host}}:{{ es_port }}"] 
   # Configure task schedule
   schedule: '@every 10s'
   # Total test connection and data exchange timeout
@@ -76,7 +76,7 @@ output.elasticsearch:
 # Array of hosts to connect to.
 {% if elk_auth_ssl == "yes" %}
   hosts:
-  {% for host in groups['elastic'] %}
+  {% for host in groups['elastic_master'] %}
   - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
   {% endfor %}
 
@@ -91,10 +91,11 @@ output.elasticsearch:
     certificate_authorities: ["{{ heartbeat_certs_dir }}/{{ elasticsearch_ca_pem }}"]
 {% else %}
   hosts:
-  {% for host in groups['elastic'] -%}
+  {% for host in groups['elastic_master'] -%}
   - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
   {% endfor %}
 {% endif %}
+
 # ------------------------------ Logstash Output -------------------------------
 #output.logstash:
   # The Logstash hosts
@@ -120,7 +121,6 @@ processors:
         name: Hanoi
         # Lat, Lon "
         location: "37.926868, -78.024902"
-
 
 # ================================== Logging ===================================
 

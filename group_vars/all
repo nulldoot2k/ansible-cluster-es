@@ -9,8 +9,8 @@ lo_version: "1:8.3.3-1"
 
 # Enable Auth
 elk_auth_ssl: "no"
-output_log_elastic: "no" # choose yes --> no logstash and else
-output_log_logstash: "yes"
+output_log_elastic: "yes" # choose yes --> no logstash and else
+output_log_logstash: "no"
 setup_kibana_dashboards: "yes" 
 
 ###############################################################

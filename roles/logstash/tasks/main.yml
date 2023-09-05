@@ -68,14 +68,14 @@
   template:
     src: nginx.j2
     dest: "{{ logstash_pat_dir }}/nginx"
-  when: output_log_logstash == "yes"
+  when: output_log_logstash == "no"
 
 - name: "Render logstash analytics file"
   file:
     path: "{{ nginx_logs_dir }}/*.log"
     mode: '0644'
     recurse: yes
-  when: output_log_logstash == "yes"
+  when: output_log_logstash == "no"
   
 - name: "Render logstash JVM configuration file"
   template:
