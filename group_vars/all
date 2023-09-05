@@ -125,6 +125,7 @@ logstash_conf_dir: "/etc/logstash"
 logstash_log_dir: "/var/log/logstash"
 logstash_pid_dir: "/var/run/logstash"
 logstash_certs_dir: "/etc/logstash/certs"
+logstash_pat_dir: "/etc/logstash/patterns"
 logstash_data_dir: "/var/lib/logstash"
 
 # -- Path filebeat --

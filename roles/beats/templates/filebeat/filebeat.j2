@@ -100,7 +100,7 @@ setup.kibana:
 {% if output_log_elastic == "yes" %}
 output.elasticsearch:
   # Array of hosts to connect to.
-  {% if eyes == "yes" %}
+  {% if elk_auth_ssl == "yes" %}
   hosts: 
   {% for host in groups['elastic'] %}
   - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}

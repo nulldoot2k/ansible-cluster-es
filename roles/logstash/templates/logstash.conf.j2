@@ -1,25 +1,72 @@
 input {
+{% if output_log_elastic == "yes" %}
 	beats {
 		port => {{ lo_port }}
 	}
+{% else %}
+	file {
+		path => ["/var/log/nginx/*.log"]
+		type => "nginx"
+	}
+{% endif %}
 }
 
 ## Add your filters / logstash plugins configuration here
+{% if output_log_elastic == "yes" %}
+filter {}
+{% else %}
+filter {
+  grok {
+    patterns_dir => "{{ logstash_pat_dir }}"
+    match => { "message" => "%{NGINX_ACCESS}" }
+    remove_tag => ["_grokparsefailure"]
+    add_tag => ["nginx_access"]
+    overwrite => [ "message" ]
+  }
+  mutate {
+    convert => ["response", "integer"]
+    convert => ["bytes", "integer"]
+    convert => ["responsetime", "float"]
+  }
+  geoip {
+    source => "clientip"
+    target => "geoip"
+    add_tag => [ "nginx-geoip" ]
+  }
+  date {
+    match => [ "timestamp" , "dd/MMM/YYYY:HH:mm:ss Z" ]
+    locale => en
+    remove_field => [ "timestamp" ]
+  }
+  useragent {
+    source => "agent"
+    target => "user_agent"
+  }
+}
+{% endif %}
 
 output {
-{% if elk_auth_ssl == "yes" %}
-	elasticsearch {
-		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
-		index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
-		user => "{{ es_username }}"
-		password => "{{ es_password }}"
-		ssl_certificate_verification => false
-    ssl => true
-	}
+{% if output_log_elastic == "yes" %}
+	{% if elk_auth_ssl == "yes" %}
+		elasticsearch {
+			hosts => [{% for host in groups['elastic_master'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
+			index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
+			user => "{{ es_username }}"
+			password => "{{ es_password }}"
+			ssl_certificate_verification => false
+    	ssl => true
+		}
+	{% else %}
+		elasticsearch {
+			hosts => [{% for host in groups['elastic_master'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
+			index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
+		}
+	{% endif %}
 {% else %}
-	elasticsearch {
-		hosts => [{% for host in groups['elastic'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
+  elasticsearch {
+		hosts => [{% for host in groups['elastic_master'] %}"{{ hostvars[host]['ansible_host'] }}:{{ es_port }}"{% if not loop.last %},{% endif %}{% endfor %}]
 		index => "{{ inventory_hostname }}-%{+YYYY.MM.dd}"
-	}
+    document_type => "nginx_logs"
+  }
 {% endif %}
 }

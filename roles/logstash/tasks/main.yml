@@ -11,7 +11,7 @@
     state: present
 
 - name: "[Logstash] - Fix directory permission"
-  ansible.builtin.file:
+  file:
     path: "{{ item }}"
     state: directory
     owner: "{{ lo_owner }}"
@@ -24,6 +24,11 @@
     - "{{ logstash_pid_dir }}"
     - "{{ logstash_data_dir }}"
     - "{{ logstash_certs_dir }}"
+
+- name: Create patterns folder
+  file:
+    path: "{{ logstash_pat_dir }}"
+    state: directory
 
 - name: "[Logstash] - Copy elastic CA Pem logstash"
   copy:
@@ -58,6 +63,12 @@
     owner: "{{ lo_owner }}"
     group: "{{ lo_groups }}"
     mode: 0644
+    
+- name: "Render logstash analytics file"
+  template:
+    src: nginx.j2
+    dest: "{{ logstash_pat_dir }}/nginx"
+  when: output_log_logstash == "yes"
 
 - name: "Render logstash JVM configuration file"
   template:

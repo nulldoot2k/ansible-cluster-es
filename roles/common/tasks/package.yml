@@ -8,6 +8,17 @@
 - name: "[Common] - Fix common Java configuration issues"
   shell: "dpkg --configure -a"
 
+- name: Add config edit Vim into ~/.vimrc
+  copy:
+    content: |
+      set tabstop=2
+      set softtabstop=2
+      set shiftwidth=2
+      set expandtab
+      set smarttab
+      set autoindent
+    dest: ~/.vimrc
+
 - name: "[Common] - Install Java and other packages"
   apt: 
     name: "{{ es_package }}"
