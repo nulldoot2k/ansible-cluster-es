@@ -84,7 +84,7 @@ setup.kibana:
 {% if output_log_elastic == "yes" %}
 output.elasticsearch:
   # Array of hosts to connect to.
-  {% if elk_auth_ssl == "yes" %}
+{% if elk_auth_ssl == "yes" %}
   hosts: 
   {% for host in groups['elastic_master'] %}
   - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
@@ -95,12 +95,12 @@ output.elasticsearch:
   ssl:
      enabled: true
      certificate_authorities: "{{ filebeat_certs_dir }}/{{ elasticsearch_ca_pem }}"
-  {% else %}
+{% else %}
   hosts: 
   {% for host in groups['elastic_master'] %}
-    - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
+  - {{ hostvars[host]['ansible_host'] }}:{{ es_port }}
   {% endfor %}
-  {% endif %}
+{% endif %}
 {% endif %}
      
 # ------------------------------ Logstash Output -------------------------------

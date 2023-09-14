@@ -1,10 +1,17 @@
 127.0.0.1 localhost
 
-127.0.1.1 {{ inventory_hostname }} devops{{ groups['elastic'].index(inventory_hostname) + 1 if inventory_hostname in groups['elastic'] else '' }}.{{ 'elastic.cloud' if inventory_hostname in groups['elastic'] else 'kibana.cloud' }} localhost
+127.0.1.1 {{ inventory_hostname }} devops{{
+  groups['elastic'].index(inventory_hostname) + 1 if inventory_hostname in
+  groups['elastic'] else '' }}.{{ 'elastic.cloud' if inventory_hostname in
+  groups['elastic'] else 'kibana.cloud' }} localhost
 
 {% for host in groups['elastic'] %}
-{{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['inventory_hostname'] }} devops{{ loop.index }}.elastic.cloud
+{% set host_number = hostvars[host]['inventory_hostname'] | regex_replace('^devops-es-node', '') %}
+{{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['inventory_hostname'] }} devops{{ host_number }}.elastic.cloud
 {% endfor %}
 {% for host in groups['kibana'] %}
 {{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['inventory_hostname'] }} devops.kibana.cloud
+{% endfor %}
+{% for host in groups['logstash'] %}
+{{ hostvars[host]['ansible_host'] }} {{ hostvars[host]['inventory_hostname'] }} devops.logstash.cloud
 {% endfor %}
